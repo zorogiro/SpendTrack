@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "SpendTrack",
+    "slug": "spendtrack",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "spendtrack",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.spendtrack.app"
+    },
+    "android": {
+      "package": "com.spendtrack.app"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-status-bar"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
