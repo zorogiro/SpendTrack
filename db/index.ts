@@ -125,9 +125,7 @@ export async function updateSettings(
   patch: Partial<Omit<Settings, 'id'>>,
 ): Promise<void> {
   const db = await getDatabase();
-  // NOTE: COALESCE cannot write NULL for language (to reset to device-follow).
-  // A dedicated clearLanguage() helper is needed for the language picker's
-  // "Follow device" option — tracked as a known blocker for that feature.
+  // COALESCE cannot write NULL for language; use clearLanguageOverride() instead.
   await db.runAsync(
     `UPDATE settings SET
        base_currency   = COALESCE(?, base_currency),
@@ -142,6 +140,11 @@ export async function updateSettings(
       patch.language        ?? null,
     ],
   );
+}
+
+export async function clearLanguageOverride(): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync('UPDATE settings SET language = NULL WHERE id = 1');
 }
 
 // ── Expenses ─────────────────────────────────────────────────────────────────

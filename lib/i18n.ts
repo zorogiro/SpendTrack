@@ -9,7 +9,7 @@ import ar from '../locales/ar.json';
 const SUPPORTED = ['en', 'fr', 'ar'] as const;
 type SupportedLocale = (typeof SUPPORTED)[number];
 
-function detectLocale(): SupportedLocale {
+export function detectLocale(): SupportedLocale {
   const code = Localization.getLocales()[0]?.languageCode ?? '';
   return (SUPPORTED as readonly string[]).includes(code)
     ? (code as SupportedLocale)
