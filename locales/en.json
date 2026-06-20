@@ -1,4 +1,13 @@
 {
+  "summary": {
+    "loading": "Loading…",
+    "spent_this_month": "SPENT THIS MONTH",
+    "projected_label": "Projected · at this pace",
+    "empty": "No expenses this month",
+    "by_category": "BY CATEGORY",
+    "pct_of_parent": "% OF {{parent}}",
+    "direct_label": "{{name}} (direct)"
+  },
   "history": {
     "loading": "Loading…",
     "this_month": "THIS MONTH",

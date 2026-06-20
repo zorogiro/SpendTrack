@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { getCategoryTree, getExpensesForMonth, getSettings } from '../../db';
 import { getBudgetMonthBounds } from '../../lib/budgetMonth';
 import { fmtTND } from '../../lib/format';
@@ -110,6 +111,7 @@ function buildRollup(rows: ExpenseRow[], tree: CategoryTree[]): ParentTotal[] {
 // ── Screen ────────────────────────────────────────────────────────────────────
 
 export default function SummaryScreen() {
+  const { t } = useTranslation();
   const [totalSpent,   setTotalSpent]   = useState(0);
   const [projected,    setProjected]    = useState(0);
   const [parents,      setParents]      = useState<ParentTotal[]>([]);
@@ -144,7 +146,7 @@ export default function SummaryScreen() {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
         <View style={styles.center}>
-          <Text style={styles.muted}>Loading…</Text>
+          <Text style={styles.muted}>{t('summary.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -156,23 +158,23 @@ export default function SummaryScreen() {
 
         {/* ── Totals card ─────────────────────────────────────────────────── */}
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>SPENT THIS MONTH</Text>
+          <Text style={styles.cardLabel}>{t('summary.spent_this_month')}</Text>
           <Text style={styles.totalAmt}>{fmtTND(totalSpent)} TND</Text>
 
           <View style={styles.divider} />
 
-          <Text style={styles.projLabel}>Projected · at this pace</Text>
+          <Text style={styles.projLabel}>{t('summary.projected_label')}</Text>
           <Text style={styles.projAmt}>{fmtTND(projected)} TND</Text>
         </View>
 
         {/* ── Category breakdown ──────────────────────────────────────────── */}
         {parents.length === 0 ? (
           <View style={styles.emptyCard}>
-            <Text style={styles.muted}>No expenses this month</Text>
+            <Text style={styles.muted}>{t('summary.empty')}</Text>
           </View>
         ) : (
           <View style={styles.card}>
-            <Text style={styles.cardLabel}>BY CATEGORY</Text>
+            <Text style={styles.cardLabel}>{t('summary.by_category')}</Text>
             {parents.map((cat, i) => {
               const isExpanded  = expanded.has(cat.category_id);
               const expandable  = cat.subs.length > 0;
@@ -212,12 +214,16 @@ export default function SummaryScreen() {
                   {/* Sub-category breakdown */}
                   {isExpanded && (
                     <View style={styles.subsWrap}>
-                      <Text style={styles.subHeader}>% OF {cat.category_name.toUpperCase()}</Text>
+                      <Text style={styles.subHeader}>{t('summary.pct_of_parent', { parent: cat.category_name.toUpperCase() })}</Text>
                       {cat.subs.map(sub => (
                         <View key={sub.key} style={styles.subRow}>
                           <View style={styles.catMeta}>
                             <View style={[styles.subDot, { backgroundColor: sub.category_color }]} />
-                            <Text style={styles.subName} numberOfLines={1}>{sub.category_name}</Text>
+                            <Text style={styles.subName} numberOfLines={1}>
+                              {sub.key.endsWith('-direct')
+                                ? t('summary.direct_label', { name: cat.category_name })
+                                : sub.category_name}
+                            </Text>
                             <Text style={styles.catPct}>{Math.round(sub.shareOfParent * 100)}%</Text>
                             <Text style={styles.catAmt}>{fmtTND(sub.total)}</Text>
                             <View style={styles.chevronSlot} />

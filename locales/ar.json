@@ -1,4 +1,13 @@
 {
+  "summary": {
+    "loading": "جارٍ التحميل…",
+    "spent_this_month": "المصروف هذا الشهر",
+    "projected_label": "متوقع · بهذه الوتيرة",
+    "empty": "لا توجد مصاريف هذا الشهر",
+    "by_category": "حسب الفئة",
+    "pct_of_parent": "% من {{parent}}",
+    "direct_label": "{{name}} (مباشر)"
+  },
   "history": {
     "loading": "جارٍ التحميل…",
     "this_month": "هذا الشهر",
