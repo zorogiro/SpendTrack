@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { I18nManager, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -193,7 +193,7 @@ export default function SummaryScreen() {
                     <Text style={styles.catAmt}>{fmtTND(cat.total)}</Text>
                     {expandable ? (
                       <Ionicons
-                        name={isExpanded ? 'chevron-down' : 'chevron-forward'}
+                        name={isExpanded ? 'chevron-down' : (I18nManager.isRTL ? 'chevron-back' : 'chevron-forward')}
                         size={16}
                         color="#8e8e93"
                         style={styles.chevron}

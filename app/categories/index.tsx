@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, I18nManager, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { router, Stack, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -141,7 +141,7 @@ export default function CategoriesScreen() {
                     style={styles.chevronBtn}
                   >
                     <Ionicons
-                      name={isExpanded ? 'chevron-down' : 'chevron-forward'}
+                      name={isExpanded ? 'chevron-down' : (I18nManager.isRTL ? 'chevron-back' : 'chevron-forward')}
                       size={18}
                       color="#8e8e93"
                     />

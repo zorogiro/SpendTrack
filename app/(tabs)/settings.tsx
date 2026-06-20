@@ -1,5 +1,6 @@
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { I18nManager, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
@@ -14,7 +15,7 @@ export default function SettingsScreen() {
           <Text style={styles.groupLabel}>{t('settings.manage')}</Text>
           <TouchableOpacity style={[styles.row, styles.rowOnly]} onPress={() => router.push('/categories')}>
             <Text style={styles.rowLabel}>{t('settings.categories_budgets')}</Text>
-            <Text style={styles.chevron}>›</Text>
+            <Ionicons name={I18nManager.isRTL ? 'chevron-back' : 'chevron-forward'} size={18} color="#c7c7cc" />
           </TouchableOpacity>
         </View>
 

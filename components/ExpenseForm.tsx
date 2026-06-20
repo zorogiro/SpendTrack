@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   FlatList,
+  I18nManager,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -273,7 +274,7 @@ export default function ExpenseForm({ initial, onSave }: Props) {
                     {item.icon ? <Text style={styles.chipIcon}>{item.icon}</Text> : null}
                     <Text style={styles.chipLabel}>{item.name}</Text>
                     {effectiveStage === 'parents' && parentIdsWithChildren.has(item.id) && (
-                      <Text style={styles.chipArrow}>›</Text>
+                      <Text style={styles.chipArrow}>{I18nManager.isRTL ? '‹' : '›'}</Text>
                     )}
                   </TouchableOpacity>
                 )}

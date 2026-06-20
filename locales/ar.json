@@ -33,11 +33,11 @@
     "save": "حفظ",
     "update": "تحديث",
     "change": "تغيير",
-    "breadcrumb": "← {{parent}}",
-    "more": "المزيد ›",
+    "breadcrumb": "→ {{parent}}",
+    "more": "‹ المزيد",
     "note_placeholder": "أضف ملاحظة…",
     "add_note": "+ أضف ملاحظة",
-    "selected_label": "{{parent}} → {{child}}"
+    "selected_label": "{{child}} ← {{parent}}"
   },
   "summary": {
     "loading": "جارٍ التحميل…",
