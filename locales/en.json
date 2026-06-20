@@ -1,4 +1,14 @@
 {
+  "expense": {
+    "save": "SAVE",
+    "update": "UPDATE",
+    "change": "Change",
+    "breadcrumb": "← {{parent}}",
+    "more": "More ›",
+    "note_placeholder": "Add a note…",
+    "add_note": "+ Add note",
+    "selected_label": "{{parent}} → {{child}}"
+  },
   "summary": {
     "loading": "Loading…",
     "spent_this_month": "SPENT THIS MONTH",

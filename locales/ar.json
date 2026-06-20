@@ -1,4 +1,14 @@
 {
+  "expense": {
+    "save": "حفظ",
+    "update": "تحديث",
+    "change": "تغيير",
+    "breadcrumb": "← {{parent}}",
+    "more": "المزيد ›",
+    "note_placeholder": "أضف ملاحظة…",
+    "add_note": "+ أضف ملاحظة",
+    "selected_label": "{{parent}} → {{child}}"
+  },
   "summary": {
     "loading": "جارٍ التحميل…",
     "spent_this_month": "المصروف هذا الشهر",

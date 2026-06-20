@@ -1,4 +1,14 @@
 {
+  "expense": {
+    "save": "ENREGISTRER",
+    "update": "MODIFIER",
+    "change": "Modifier",
+    "breadcrumb": "← {{parent}}",
+    "more": "Plus ›",
+    "note_placeholder": "Ajouter une note…",
+    "add_note": "+ Ajouter une note",
+    "selected_label": "{{parent}} → {{child}}"
+  },
   "summary": {
     "loading": "Chargement…",
     "spent_this_month": "DÉPENSÉ CE MOIS",
