@@ -1,4 +1,13 @@
 {
+  "history": {
+    "loading": "Loading…",
+    "this_month": "THIS MONTH",
+    "empty": "No expenses this month",
+    "delete_title": "Delete expense?",
+    "delete_message": "{{amount}} {{currency}} · {{category}}",
+    "delete_cancel": "Cancel",
+    "delete_confirm": "Delete"
+  },
   "settings": {
     "manage": "MANAGE",
     "categories_budgets": "Categories & Budgets",

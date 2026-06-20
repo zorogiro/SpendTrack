@@ -1,4 +1,13 @@
 {
+  "history": {
+    "loading": "جارٍ التحميل…",
+    "this_month": "هذا الشهر",
+    "empty": "لا توجد مصاريف هذا الشهر",
+    "delete_title": "حذف المصروف؟",
+    "delete_message": "{{amount}} {{currency}} · {{category}}",
+    "delete_cancel": "إلغاء",
+    "delete_confirm": "حذف"
+  },
   "settings": {
     "manage": "إدارة",
     "categories_budgets": "الفئات والميزانيات",

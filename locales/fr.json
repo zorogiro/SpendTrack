@@ -1,4 +1,13 @@
 {
+  "history": {
+    "loading": "Chargement…",
+    "this_month": "CE MOIS",
+    "empty": "Aucune dépense ce mois-ci",
+    "delete_title": "Supprimer la dépense ?",
+    "delete_message": "{{amount}} {{currency}} · {{category}}",
+    "delete_cancel": "Annuler",
+    "delete_confirm": "Supprimer"
+  },
   "settings": {
     "manage": "GÉRER",
     "categories_budgets": "Catégories et budgets",
