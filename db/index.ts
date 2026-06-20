@@ -1,5 +1,5 @@
 import * as SQLite from 'expo-sqlite';
-import type { Category, Settings } from '../types';
+import type { Category, Currency, Settings } from '../types';
 
 let _db: SQLite.SQLiteDatabase | null = null;
 
@@ -44,4 +44,30 @@ export async function updateSettings(
   );
 }
 
-// ── Expense helpers added per screen in Phase 1 builds ───────────────────────
+// ── Expenses ─────────────────────────────────────────────────────────────────
+
+export async function addExpense(input: {
+  amount: number;
+  currency: Currency;
+  amount_base: number;
+  category_id: number;
+  note: string | null;
+  date: string;
+}): Promise<number> {
+  const db = await getDatabase();
+  const result = await db.runAsync(
+    `INSERT INTO expenses
+       (amount, currency, amount_base, category_id, note, date, created_at, recurring_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, NULL)`,
+    [
+      input.amount,
+      input.currency,
+      input.amount_base,
+      input.category_id,
+      input.note,
+      input.date,
+      new Date().toISOString(),
+    ],
+  );
+  return result.lastInsertRowId;
+}

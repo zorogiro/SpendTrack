@@ -73,7 +73,7 @@ Work one phase per session; `/clear` between phases. Mark items done as you go.
 
 **Phase 1 — MVP**
 - [x] Scaffold Expo + TS app, tab navigator, expo-sqlite + migrations, seed default categories
-- [ ] Add Expense screen (fast; compute amount_base on save)
+- [x] Add Expense screen (fast; compute amount_base on save)
 - [ ] History screen with running totals
 - [ ] Summary screen with simple projection
 
