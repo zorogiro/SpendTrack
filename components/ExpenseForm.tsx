@@ -13,6 +13,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Keypad from './Keypad';
 import { addExpense, getCategoryTree, getRecentCategories, getSettings, updateExpense } from '../db';
+import { formatDateLabel } from '../lib/format';
 import type { Category, CategoryTree, Currency } from '../types';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -44,14 +45,6 @@ function localISO(d: Date): string {
 
 function todayISO(): string {
   return localISO(new Date());
-}
-
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] as const;
-
-function formatDisplayDate(iso: string): string {
-  if (iso === todayISO()) return 'Today';
-  const [, m, d] = iso.split('-');
-  return `${parseInt(d, 10)} ${MONTHS[parseInt(m, 10) - 1]}`;
 }
 
 function formatAmount(s: string): string {
@@ -319,7 +312,7 @@ export default function ExpenseForm({ initial, onSave }: Props) {
             </TouchableOpacity>
           )}
           <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-            <Text style={styles.dateLabel}>{formatDisplayDate(date)}</Text>
+            <Text style={styles.dateLabel}>{formatDateLabel(date)}</Text>
           </TouchableOpacity>
         </View>
 

@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getCategoryTree, getExpensesForMonth, getSettings } from '../../db';
 import { getBudgetMonthBounds } from '../../lib/budgetMonth';
+import { fmtTND } from '../../lib/format';
 import type { CategoryTree, ExpenseRow } from '../../types';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -106,13 +107,6 @@ function buildRollup(rows: ExpenseRow[], tree: CategoryTree[]): ParentTotal[] {
     .sort((a, b) => b.total - a.total);
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function fmtAmt(n: number): string {
-  const [int, dec] = n.toFixed(2).split('.');
-  return `${int.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}.${dec}`;
-}
-
 // ── Screen ────────────────────────────────────────────────────────────────────
 
 export default function SummaryScreen() {
@@ -163,12 +157,12 @@ export default function SummaryScreen() {
         {/* ── Totals card ─────────────────────────────────────────────────── */}
         <View style={styles.card}>
           <Text style={styles.cardLabel}>SPENT THIS MONTH</Text>
-          <Text style={styles.totalAmt}>{fmtAmt(totalSpent)} TND</Text>
+          <Text style={styles.totalAmt}>{fmtTND(totalSpent)} TND</Text>
 
           <View style={styles.divider} />
 
           <Text style={styles.projLabel}>Projected · at this pace</Text>
-          <Text style={styles.projAmt}>{fmtAmt(projected)} TND</Text>
+          <Text style={styles.projAmt}>{fmtTND(projected)} TND</Text>
         </View>
 
         {/* ── Category breakdown ──────────────────────────────────────────── */}
@@ -194,7 +188,7 @@ export default function SummaryScreen() {
                     <View style={[styles.dot, { backgroundColor: cat.category_color }]} />
                     <Text style={styles.catName} numberOfLines={1}>{cat.category_name}</Text>
                     <Text style={styles.catPct}>{Math.round(cat.shareOfMonth * 100)}%</Text>
-                    <Text style={styles.catAmt}>{fmtAmt(cat.total)}</Text>
+                    <Text style={styles.catAmt}>{fmtTND(cat.total)}</Text>
                     {expandable ? (
                       <Ionicons
                         name={isExpanded ? 'chevron-down' : 'chevron-forward'}
@@ -225,7 +219,7 @@ export default function SummaryScreen() {
                             <View style={[styles.subDot, { backgroundColor: sub.category_color }]} />
                             <Text style={styles.subName} numberOfLines={1}>{sub.category_name}</Text>
                             <Text style={styles.catPct}>{Math.round(sub.shareOfParent * 100)}%</Text>
-                            <Text style={styles.catAmt}>{fmtAmt(sub.total)}</Text>
+                            <Text style={styles.catAmt}>{fmtTND(sub.total)}</Text>
                             <View style={styles.chevronSlot} />
                           </View>
                           <View style={styles.barTrack}>

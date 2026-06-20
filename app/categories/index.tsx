@@ -1,6 +1,7 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { router, Stack, useFocusEffect } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { deleteCategory, getCategoryTree } from '../../db';
 import type { Category, CategoryTree } from '../../types';
@@ -11,12 +12,14 @@ type ListItem =
   | { kind: 'parent'; tree: CategoryTree }
   | { kind: 'child';  cat: Category };
 
-function buildList(trees: CategoryTree[]): ListItem[] {
+function buildList(trees: CategoryTree[], expanded: Set<number>): ListItem[] {
   const items: ListItem[] = [];
   for (const tree of trees) {
     items.push({ kind: 'parent', tree });
-    for (const child of tree.children) {
-      items.push({ kind: 'child', cat: child });
+    if (expanded.has(tree.id)) {
+      for (const child of tree.children) {
+        items.push({ kind: 'child', cat: child });
+      }
     }
   }
   return items;
@@ -25,14 +28,30 @@ function buildList(trees: CategoryTree[]): ListItem[] {
 // ── Screen ────────────────────────────────────────────────────────────────────
 
 export default function CategoriesScreen() {
-  const [items, setItems] = useState<ListItem[]>([]);
+  const [trees,    setTrees]    = useState<CategoryTree[]>([]);
+  const [expanded, setExpanded] = useState<Set<number>>(new Set());
+  const didInitExpanded = useRef(false);
+
+  const toggle = useCallback((id: number) => {
+    setExpanded(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
 
   const load = useCallback(async () => {
-    const trees = await getCategoryTree();
-    setItems(buildList(trees));
+    const data = await getCategoryTree();
+    setTrees(data);
+    if (!didInitExpanded.current) {
+      didInitExpanded.current = true;
+      setExpanded(new Set(data.filter(t => t.children.length > 0).map(t => t.id)));
+    }
   }, []);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
+
+  const items = useMemo(() => buildList(trees, expanded), [trees, expanded]);
 
   const handleDelete = useCallback((id: number, name: string) => {
     Alert.alert('Delete category?', name, [
@@ -85,6 +104,9 @@ export default function CategoriesScreen() {
 
           if (item.kind === 'parent') {
             const { tree } = item;
+            const expandable = tree.children.length > 0;
+            const isExpanded = expanded.has(tree.id);
+
             return (
               <Pressable
                 style={({ pressed }) => [
@@ -110,6 +132,21 @@ export default function CategoriesScreen() {
                 >
                   <Text style={styles.addSubLabel}>+ sub</Text>
                 </TouchableOpacity>
+                {expandable ? (
+                  <Pressable
+                    onPress={() => toggle(tree.id)}
+                    hitSlop={10}
+                    style={styles.chevronBtn}
+                  >
+                    <Ionicons
+                      name={isExpanded ? 'chevron-down' : 'chevron-forward'}
+                      size={18}
+                      color="#8e8e93"
+                    />
+                  </Pressable>
+                ) : (
+                  <View style={styles.chevronSlot} />
+                )}
               </Pressable>
             );
           }
@@ -175,6 +212,9 @@ const styles = StyleSheet.create({
 
   addSubBtn:   { paddingHorizontal: 10, paddingVertical: 4, backgroundColor: '#f2f2f7', borderRadius: 10 },
   addSubLabel: { fontSize: 12, fontWeight: '600', color: '#007aff' },
+
+  chevronBtn:  { marginLeft: 10, padding: 4 },
+  chevronSlot: { width: 26, marginLeft: 10 }, // keeps row height & alignment uniform
 
   empty:     { alignItems: 'center', paddingTop: 80 },
   emptyText: { fontSize: 15, color: '#8e8e93', textAlign: 'center', lineHeight: 24 },
