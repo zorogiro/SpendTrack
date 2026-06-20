@@ -78,6 +78,26 @@ export async function updateCategory(
   );
 }
 
+export async function getRecentCategories(limit: number, days: number): Promise<Category[]> {
+  const db = await getDatabase();
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+  const y = cutoff.getFullYear();
+  const m = String(cutoff.getMonth() + 1).padStart(2, '0');
+  const d = String(cutoff.getDate()).padStart(2, '0');
+  const cutoffISO = `${y}-${m}-${d}`;
+  return db.getAllAsync<Category>(
+    `SELECT c.*, COUNT(e.id) AS freq
+     FROM expenses e
+     JOIN categories c ON c.id = e.category_id
+     WHERE e.date >= ?
+     GROUP BY e.category_id
+     ORDER BY freq DESC
+     LIMIT ?`,
+    [cutoffISO, limit],
+  );
+}
+
 // Throws 'has_children' or 'has_expenses' if deletion is blocked.
 export async function deleteCategory(id: number): Promise<void> {
   const db = await getDatabase();
