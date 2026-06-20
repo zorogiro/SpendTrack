@@ -1,4 +1,34 @@
 {
+  "common": {
+    "today": "Today",
+    "yesterday": "Yesterday"
+  },
+  "categories": {
+    "title": "Categories",
+    "add_sub": "+ sub",
+    "budget_label": "{{amount}} TND/mo",
+    "empty": "No categories yet.\nTap ＋ to add one.",
+    "delete_title": "Delete category?",
+    "delete_cancel": "Cancel",
+    "delete_confirm": "Delete",
+    "cannot_delete_title": "Cannot delete",
+    "block_has_children": "Remove all sub-categories first.",
+    "block_has_expenses": "This category has expenses — reassign or delete them first.",
+    "delete_error": "Could not delete category.",
+    "new_title": "New Category",
+    "edit_title": "Edit Category",
+    "cancel": "Cancel",
+    "save": "Save",
+    "field_name": "NAME",
+    "field_icon": "ICON (EMOJI, OPTIONAL)",
+    "field_color": "COLOR",
+    "field_budget": "MONTHLY BUDGET (TND, OPTIONAL)",
+    "name_placeholder": "Category name",
+    "icon_placeholder": "e.g. 🍽️",
+    "budget_placeholder": "Leave blank for no budget",
+    "save_error_title": "Error",
+    "save_error_message": "Could not save. Please try again."
+  },
   "expense": {
     "save": "SAVE",
     "update": "UPDATE",

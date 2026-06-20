@@ -3,6 +3,7 @@ import { Alert, FlatList, Pressable, StyleSheet, Text, TouchableOpacity, View } 
 import { router, Stack, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { deleteCategory, getCategoryTree } from '../../db';
 import type { Category, CategoryTree } from '../../types';
 
@@ -28,6 +29,7 @@ function buildList(trees: CategoryTree[], expanded: Set<number>): ListItem[] {
 // ── Screen ────────────────────────────────────────────────────────────────────
 
 export default function CategoriesScreen() {
+  const { t } = useTranslation();
   const [trees,    setTrees]    = useState<CategoryTree[]>([]);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const didInitExpanded = useRef(false);
@@ -54,10 +56,10 @@ export default function CategoriesScreen() {
   const items = useMemo(() => buildList(trees, expanded), [trees, expanded]);
 
   const handleDelete = useCallback((id: number, name: string) => {
-    Alert.alert('Delete category?', name, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('categories.delete_title'), name, [
+      { text: t('categories.delete_cancel'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('categories.delete_confirm'),
         style: 'destructive',
         onPress: async () => {
           try {
@@ -66,25 +68,25 @@ export default function CategoriesScreen() {
           } catch (e: unknown) {
             const msg = e instanceof Error ? e.message : '';
             Alert.alert(
-              'Cannot delete',
+              t('categories.cannot_delete_title'),
               msg === 'has_children'
-                ? 'Remove all sub-categories first.'
+                ? t('categories.block_has_children')
                 : msg === 'has_expenses'
-                  ? 'This category has expenses — reassign or delete them first.'
-                  : 'Could not delete category.',
+                  ? t('categories.block_has_expenses')
+                  : t('categories.delete_error'),
             );
           }
         },
       },
     ]);
-  }, [load]);
+  }, [load, t]);
 
   return (
     <SafeAreaView style={styles.root} edges={['bottom']}>
       <Stack.Screen
         options={{
           headerShown: true,
-          title: 'Categories',
+          title: t('categories.title'),
           headerRight: () => (
             <TouchableOpacity onPress={() => router.push('/categories/new')} hitSlop={12}>
               <Text style={styles.headerBtn}>＋</Text>
@@ -123,14 +125,14 @@ export default function CategoriesScreen() {
                   {tree.icon ? `${tree.icon} ` : ''}{tree.name}
                 </Text>
                 {tree.monthly_budget != null && (
-                  <Text style={styles.budget}>{tree.monthly_budget.toFixed(0)} TND/mo</Text>
+                  <Text style={styles.budget}>{t('categories.budget_label', { amount: tree.monthly_budget.toFixed(0) })}</Text>
                 )}
                 <TouchableOpacity
                   style={styles.addSubBtn}
                   onPress={() => router.push(`/categories/new?parentId=${tree.id}`)}
                   hitSlop={8}
                 >
-                  <Text style={styles.addSubLabel}>+ sub</Text>
+                  <Text style={styles.addSubLabel}>{t('categories.add_sub')}</Text>
                 </TouchableOpacity>
                 {expandable ? (
                   <Pressable
@@ -169,14 +171,14 @@ export default function CategoriesScreen() {
                 {cat.icon ? `${cat.icon} ` : ''}{cat.name}
               </Text>
               {cat.monthly_budget != null && (
-                <Text style={styles.budget}>{cat.monthly_budget.toFixed(0)} TND/mo</Text>
+                <Text style={styles.budget}>{t('categories.budget_label', { amount: cat.monthly_budget.toFixed(0) })}</Text>
               )}
             </Pressable>
           );
         }}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>No categories yet.{'\n'}Tap ＋ to add one.</Text>
+            <Text style={styles.emptyText}>{t('categories.empty')}</Text>
           </View>
         }
       />

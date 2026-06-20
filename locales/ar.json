@@ -1,4 +1,34 @@
 {
+  "common": {
+    "today": "اليوم",
+    "yesterday": "أمس"
+  },
+  "categories": {
+    "title": "الفئات",
+    "add_sub": "+ فرعية",
+    "budget_label": "{{amount}} TND/شهر",
+    "empty": "لا توجد فئات بعد.\nاضغط ＋ لإضافة فئة.",
+    "delete_title": "حذف الفئة؟",
+    "delete_cancel": "إلغاء",
+    "delete_confirm": "حذف",
+    "cannot_delete_title": "لا يمكن الحذف",
+    "block_has_children": "احذف جميع الفئات الفرعية أولاً.",
+    "block_has_expenses": "هذه الفئة بها مصاريف — أعد تعيينها أو احذفها أولاً.",
+    "delete_error": "تعذّر حذف الفئة.",
+    "new_title": "فئة جديدة",
+    "edit_title": "تعديل الفئة",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "field_name": "الاسم",
+    "field_icon": "الأيقونة (إيموجي، اختياري)",
+    "field_color": "اللون",
+    "field_budget": "الميزانية الشهرية (TND، اختيارية)",
+    "name_placeholder": "اسم الفئة",
+    "icon_placeholder": "مثال: 🍽️",
+    "budget_placeholder": "اتركه فارغاً لعدم تحديد ميزانية",
+    "save_error_title": "خطأ",
+    "save_error_message": "تعذّر الحفظ. يرجى المحاولة مجدداً."
+  },
   "expense": {
     "save": "حفظ",
     "update": "تحديث",
