@@ -7,8 +7,10 @@ This file is the single source of truth — keep it current as the project evolv
 
 - **Expo (React Native + TypeScript)** — one codebase → iOS, Android, web. Mobile is the priority.
 - **expo-sqlite** — local-first, on-device. No backend, no login in v1. Works offline.
+- **expo-router** — file-based routing; tabs under `app/(tabs)/`, modals as stack screens.
 - Tab navigation: Add · History · Summary · Settings.
 - Sync (Supabase) is deferred; do not add until explicitly requested. The data model below is sync-ready.
+- **Versions:** confirm against package.json and keep this accurate — run `npx expo --version`. (Notes showed both SDK 54 and 56 — verify and fix here.)
 
 ## Core rule
 
@@ -17,30 +19,40 @@ Logging must be near-frictionless — the Add Expense flow should take ~3 taps m
 ## Currency
 
 - Multi-currency: **TND** + **EUR**. Base currency = TND.
-- Each expense stored in its original currency AND as `amount_base` (converted at entry time using the stored rate).
+- Each expense stored in its original currency AND as `amount_base` (converted at entry time using the stored rate, rounded to 2 decimals).
 - Never recompute `amount_base` from a live rate later — historical totals must stay fixed.
-- EUR→TND rate is stored in settings and user-editable. Live fetch is a future option only.
+- EUR→TND rate is stored in settings and user-editable (seed value is a placeholder — correct it in Settings). Live fetch is a future option only.
 
 ## Data model (SQLite)
 
-**categories**: id (pk), name, icon (nullable), color (hex), monthly_budget (real, nullable, base currency), parent_id (integer, nullable, FK → categories.id). NULL = top-level; schema supports arbitrary depth; v1 UI exposes two levels. Delete rule: blocked if category has children or expenses — user must clean up manually.
+**categories**: id (pk), name, icon (nullable), color (hex), monthly_budget (real, nullable, base currency), parent_id (integer, nullable, FK → categories.id).
+- `parent_id` NULL = top-level. Sub-categories point at their parent.
+- Schema supports arbitrary depth; the v1 UI exposes two levels only.
+- Reparenting is not supported in v1 (parent is fixed at creation) — future work if needed.
+- **Delete rule:** deletion is blocked if the category has children OR has expenses; user must clean up manually first. No cascade, no reassignment, no silent data loss. `deleteCategory` throws `'has_children'` / `'has_expenses'` so the UI can show the right message.
 
-**expenses**: id (pk), amount (real, original currency), currency ('TND'|'EUR'), amount_base (real), category_id (fk → **leaf** category — a sub-category if one was chosen, otherwise a top-level category), note (nullable), date (ISO date), created_at (ISO timestamp), recurring_id (fk, nullable)
+**expenses**: id (pk), amount (real, original currency), currency ('TND'|'EUR'), amount_base (real, rounded 2dp), category_id (fk → **leaf** category — a sub-category if one was chosen, otherwise a top-level category), note (nullable), date (ISO `YYYY-MM-DD`, zero-padded), created_at (ISO timestamp, set by addExpense), recurring_id (fk, nullable).
 
-**recurring**: id (pk), amount, currency, category_id (fk), note (nullable), frequency ('monthly'|'weekly'), day_of_month (int, nullable), day_of_week (int, nullable), start_date (ISO), end_date (ISO, nullable), last_generated_date (ISO, nullable)
+**recurring**: id (pk), amount, currency, category_id (fk), note (nullable), frequency ('monthly'|'weekly'), day_of_month (int, nullable), day_of_week (int, nullable), start_date (ISO), end_date (ISO, nullable), last_generated_date (ISO, nullable). *(Table exists in schema; recurring feature not yet built.)*
 
-**settings** (single row): base_currency (default 'TND'), eur_to_tnd_rate (real), month_start_day (int, default 1)
+**settings** (single row, pinned `id = 1` with `CHECK(id = 1)`): base_currency (default 'TND'), eur_to_tnd_rate (real), month_start_day (int, default 1).
 
 ### Schema migrations
 
-- v1 — initial schema: categories, settings, recurring, expenses
-- v2 — `ALTER TABLE categories ADD COLUMN parent_id INTEGER REFERENCES categories(id)` (non-destructive; existing rows become top-level)
+- **v1** — initial schema: categories, settings, recurring, expenses. PRAGMA `user_version` gates migrations.
+- **v2** — `ALTER TABLE categories ADD COLUMN parent_id INTEGER REFERENCES categories(id)` (non-destructive; existing rows become top-level).
+
+## Budget month window
+
+Both History and Summary use a single shared helper — `lib/budgetMonth.ts` — so they can never disagree on the window. Do not duplicate this logic.
+- `getMonthStart(monthStartDay)` → `YYYY-MM-DD` start of the current budget period, clamping `monthStartDay` to the last real day of the target month (`new Date(y, m+1, 0).getDate()`) so values like 29–31 don't roll into the next month.
+- `getBudgetMonthBounds(monthStartDay)` → `{ monthStart, daysElapsed, daysInMonth }`. Dates constructed at local midnight; day counts via ms-subtraction / 86,400,000. `daysElapsed` is inclusive (today = day 1). `daysInMonth` is the length of the budget period (start → next period start), not a calendar month. (DST note: ms-division assumes 24h days; fine for non-DST locales like Tunisia.)
 
 ## Projection logic
 
 ```
-days_elapsed   = today - month_start + 1
-days_in_month  = days in current budget month
+days_elapsed   = today - month_start + 1   (inclusive; guard /0 on day 1)
+days_in_month  = days in current budget period
 days_remaining = days_in_month - days_elapsed
 
 variable_spent = sum(amount_base) of non-recurring expenses this month
@@ -50,56 +62,70 @@ projected_var  = variable_spent + avg_daily_var * days_remaining
 remaining_recurring = recurring entries due later this month, not yet generated
 projected_month_total = projected_var + remaining_recurring
 ```
-v1 may use the simple form `spent / days_elapsed * days_in_month`; add the recurring-aware version in Phase 2.
+**Currently shipped:** the simple form `spent / days_elapsed * days_in_month`, labelled "at this pace." Upgrade to the recurring-aware form above when recurring expenses are built.
 
-## Screens
+## Screens & key files
 
-1. **Add Expense** (hero) — amount keypad, TND/EUR toggle, category picker, optional note, date = today.
-2. **History** — newest-first, grouped by day, with per-day + month-to-date totals; show original amount + currency per row.
-3. **Summary** — month total, projection, category breakdown, budget progress.
-4. **Categories & Budgets** — manage categories, set per-category monthly budget.
-5. **Recurring** — manage recurring expenses; generate due entries on app launch.
-6. **Settings** — base currency, EUR→TND rate, month start day, CSV export.
+1. **Add Expense** (hero) — `app/(tabs)/index.tsx` is a thin wrapper around `components/ExpenseForm.tsx` (shared create/edit form). On-screen numeric keypad (`components/Keypad.tsx`, emits raw keys; amount-input rules live in the form), TND/EUR toggle, two-level category picker with a recents row, optional collapsible note, date defaulting to today. On save: compute `amount_base` (round 2dp), insert via `addExpense`; in create mode reset-in-place and stay; in edit mode call `onSave()` and pop.
+   - **Category picker:** state machine `recents → parents → children`. Recents = most-used leaf categories (last 30 expenses) as one-tap chips; "More ›" opens the two-step parent→child browse. Empty recents skips straight to parents. Selecting a childless parent sets it directly as the leaf. Collapsed label shows "Parent → Child"; "Change" reopens.
+2. **History** — `app/(tabs)/history.tsx`. `SectionList` grouped by day; section header = date + day total; rows show category dot + name + note + **original** amount/currency. MTD total card on top. Reloads on focus (`useFocusEffect`). Tap row → edit (`app/expense/[id].tsx`); long-press → delete confirm.
+3. **Summary** — `app/(tabs)/summary.tsx`. Total-spent + projection cards (unchanged by category logic). Category breakdown **rolls sub-categories up under their top-level parent**: one bar per parent (share of month), expandable to sub-rows (share of parent). When a parent has both direct and sub expenses, a synthetic "(direct)" remainder row keeps sub-rows summing to the parent total. Empty-month "No expenses" card. CSS-width bars, no chart library.
+4. **Categories & Budgets** — `app/categories/index.tsx` (tree list: parents + indented subs, "+ sub" per parent), `app/categories/new.tsx` (create; optional `?parentId=`), `app/categories/[id].tsx` (edit). Shared `components/CategoryForm.tsx`. Reached from the Settings hub.
+5. **Recurring** — manage recurring expenses; generate due entries on launch. *(Not yet built.)*
+6. **Settings** — `app/(tabs)/settings.tsx`, a hub. Links to Categories & Budgets; placeholder rows for base currency, EUR→TND rate, month start day, CSV export.
+
+## DB layer (`db/index.ts`)
+
+All SQL lives here; screens never write raw SQL. Key helpers shipped:
+- Expenses: `addExpense` (stamps created_at), `updateExpense`, `getExpense` (→ `Expense | null`), `deleteExpense`, `getExpensesForMonth(monthStartISO)` (JOIN → `ExpenseRow[]`).
+- Categories: `getCategories`, `getCategoryById`, `getTopCategories`, `getSubcategories`, `getCategoryTree` (→ `CategoryTree[]`), `getRecentCategories(limit, days)`, `addCategory`, `updateCategory` (no reparenting), `deleteCategory` (throws on block).
+- Settings: `getSettings`, `updateSettings`. Migrations + seed run on app launch (`app/_layout.tsx`); seed is idempotent (`INSERT OR IGNORE`).
 
 ## Conventions
 
 - TypeScript strict. Functional components + hooks.
-- Keep DB access in a dedicated `db/` layer; screens never write raw SQL inline.
-- Schema changes go through a migrations file.
-- Small, reviewable commits — one screen/feature per commit.
+- Keep DB access in `db/`; screens never write raw SQL inline.
+- Schema changes go through the migrations file with a `user_version` bump; non-destructive.
+- Shared logic lives in one place (e.g. `lib/budgetMonth.ts`, shared form components) — never duplicate the budget-window or form logic.
+- Dates always zero-padded `YYYY-MM-DD` so string comparisons in WHERE clauses are reliable.
+- Small, reviewable commits — one screen/feature per commit. Commit + push after each item (off-device backup).
 
 ## Compact instructions
 
-When compacting, preserve: the data model, the projection formula, current phase/TODO state, and any schema or architecture decisions. Preserve any tree/parent-child logic and the delete-safety rule — this is foundational to category management. Drop verbose tool output and exploratory back-and-forth.
+When compacting, preserve: the data model, the projection formula, the budget-month window logic, current phase/TODO state, and all schema/architecture decisions. Preserve the category tree/parent-child logic, the delete-safety rule, the leaf-category rule for expenses, and the Summary rollup with the synthetic "(direct)" row — these are foundational. Drop verbose tool output and exploratory back-and-forth.
 
 ## Build phases & TODO
 
-Work one phase per session; `/clear` between phases. Mark items done as you go.
+Work one item per session; `/clear` between items. Mark items done as you go.
 
-**Phase 1 — MVP**
-
+**Phase 1 — MVP** ✅ complete
 - [x] Scaffold Expo + TS app, tab navigator, expo-sqlite + migrations, seed default categories
 - [x] Add Expense screen (fast; compute amount_base on save)
 - [x] History screen with running totals
-- [x] Delete an expense from History (deleteExpense helper + confirm step)
-- [x] Edit an expense (reuse Add Expense form in edit mode + updateExpense helper)
+- [x] Delete an expense from History (deleteExpense + confirm)
+- [x] Edit an expense (shared ExpenseForm in edit mode + updateExpense)
 - [x] Summary screen with simple projection
 
 **Phase 2 — sticky**
-
 - [x] Sub-categories: schema v2 migration + management screen (list / add / edit / delete with block rule)
-- [ ] Category picker in Add Expense — two-level selection (parent → child)
+- [x] Category picker in Add Expense — two-level selection (recents → parent → child)
+- [x] Summary: roll sub-categories up under parent, expand-to-sub with synthetic "(direct)" remainder row
 - [ ] Over-budget indicators in Summary + per-category budget progress
 - [ ] Recurring expenses + auto-generate on launch + recurring-aware projection
 - [ ] Charts (category breakdown, spend-over-time, projection vs budget)
 - [ ] CSV export
 
 **Phase 3 — later**
-
 - [ ] Expo web build + responsive polish
 - [ ] Optional Supabase sync + auth
 - [ ] Optional live exchange rate; receipt photo; income/net-savings
 
 ## Current status
 
-**Phase 2 in progress.** Expo SDK 54 / React Native 0.81.5 / expo-sqlite 16.0.10. Phase 1 complete. Sub-categories schema (v2: `ALTER TABLE categories ADD COLUMN parent_id`) and Categories management screen shipped (`app/categories/`). Shared form: `components/CategoryForm.tsx`. New DB helpers: `getCategoryTree`, `getCategoryById`, `getTopCategories`, `getSubcategories`, `addCategory`, `updateCategory`, `deleteCategory` (throws `has_children` / `has_expenses` if blocked). Settings tab is now a real hub linking to Categories. Next: two-level category picker in Add Expense.
+**Phase 2 in progress. Phase 1 complete.** The sub-category feature is complete end to end: schema (v2 `parent_id`), Categories management (`app/categories/` + `components/CategoryForm.tsx`), two-level Add Expense picker with a recents row (`components/ExpenseForm.tsx`, `getRecentCategories`), and the Summary parent-rollup with expand-to-sub and the synthetic "(direct)" remainder row. Budget-month window shared via `lib/budgetMonth.ts`.
+
+Remaining Phase 2: per-category budgets / over-budget indicators, recurring expenses (also upgrades the projection to recurring-aware), charts, CSV export.
+
+**Next item: TBD** — using the app on real spending for a stretch before picking, so the priority order reflects what actually annoys in daily use (likely recurring vs. budgets).
+
+*(Housekeeping: verify the Expo SDK version and fix the Stack section — notes showed both 54 and 56.)*
