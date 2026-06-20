@@ -4,28 +4,8 @@ import { router, useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { deleteExpense, getExpensesForMonth, getSettings } from '../../db';
 import { getMonthStart } from '../../lib/budgetMonth';
+import { fmtTND, formatDateLabel } from '../../lib/format';
 import type { ExpenseRow } from '../../types';
-
-// ── Pure helpers ──────────────────────────────────────────────────────────────
-
-function pad(n: number): string {
-  return String(n).padStart(2, '0');
-}
-
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] as const;
-
-function formatDate(iso: string): string {
-  const today = new Date();
-  const todayStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
-  if (iso === todayStr) return 'Today';
-  const [, m, d] = iso.split('-');
-  return `${parseInt(d, 10)} ${MONTHS[parseInt(m, 10) - 1]}`;
-}
-
-function fmtAmt(n: number): string {
-  const [int, dec] = n.toFixed(2).split('.');
-  return `${int.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}.${dec}`;
-}
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -66,7 +46,7 @@ export default function HistoryScreen() {
   const confirmDelete = useCallback((item: ExpenseRow) => {
     Alert.alert(
       'Delete expense?',
-      `${fmtAmt(item.amount)} ${item.currency} · ${item.category_name}`,
+      `${fmtTND(item.amount)} ${item.currency} · ${item.category_name}`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -101,13 +81,13 @@ export default function HistoryScreen() {
         ListHeaderComponent={
           <View style={styles.mtdCard}>
             <Text style={styles.mtdLabel}>THIS MONTH</Text>
-            <Text style={styles.mtdAmount}>{fmtAmt(mtdTotal)} TND</Text>
+            <Text style={styles.mtdAmount}>{fmtTND(mtdTotal)} TND</Text>
           </View>
         }
         renderSectionHeader={({ section }) => (
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionDate}>{formatDate(section.date)}</Text>
-            <Text style={styles.sectionTotal}>{fmtAmt(section.dayTotal)} TND</Text>
+            <Text style={styles.sectionDate}>{formatDateLabel(section.date)}</Text>
+            <Text style={styles.sectionTotal}>{fmtTND(section.dayTotal)} TND</Text>
           </View>
         )}
         renderItem={({ item, index, section }) => {
@@ -134,7 +114,7 @@ export default function HistoryScreen() {
                   <Text style={styles.rowNote} numberOfLines={1}>{item.note}</Text>
                 ) : null}
               </View>
-              <Text style={styles.rowAmt}>{fmtAmt(item.amount)} {item.currency}</Text>
+              <Text style={styles.rowAmt}>{fmtTND(item.amount)} {item.currency}</Text>
             </Pressable>
           );
         }}

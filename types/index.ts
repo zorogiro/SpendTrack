@@ -7,6 +7,11 @@ export interface Category {
   icon: string | null;
   color: string;
   monthly_budget: number | null;
+  parent_id: number | null; // NULL = top-level; schema supports arbitrary depth, UI exposes two levels
+}
+
+export interface CategoryTree extends Category {
+  children: Category[]; // direct sub-categories, sorted by name; [] for leaves
 }
 
 export interface Expense {
