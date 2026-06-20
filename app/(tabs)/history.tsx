@@ -3,29 +3,13 @@ import { Alert, Pressable, SectionList, StyleSheet, Text, View } from 'react-nat
 import { router, useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { deleteExpense, getExpensesForMonth, getSettings } from '../../db';
+import { getMonthStart } from '../../lib/budgetMonth';
 import type { ExpenseRow } from '../../types';
 
 // ── Pure helpers ──────────────────────────────────────────────────────────────
 
 function pad(n: number): string {
   return String(n).padStart(2, '0');
-}
-
-function getMonthStart(monthStartDay: number): string {
-  const today = new Date();
-  let year = today.getFullYear();
-  let month = today.getMonth(); // 0-indexed
-
-  if (today.getDate() < monthStartDay) {
-    month -= 1;
-    if (month < 0) { month = 11; year -= 1; }
-  }
-
-  // Clamp to last actual day of that month (handles e.g. day=31 in Feb/Apr)
-  const lastDay = new Date(year, month + 1, 0).getDate();
-  const day = Math.min(monthStartDay, lastDay);
-
-  return `${year}-${pad(month + 1)}-${pad(day)}`;
 }
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] as const;

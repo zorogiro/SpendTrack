@@ -77,7 +77,7 @@ Work one phase per session; `/clear` between phases. Mark items done as you go.
 - [x] History screen with running totals
 - [x] Delete an expense from History (deleteExpense helper + confirm step)
 - [x] Edit an expense (reuse Add Expense form in edit mode + updateExpense helper)
-- [ ] Summary screen with simple projection
+- [x] Summary screen with simple projection
 
 **Phase 2 — sticky**
 - [ ] Categories & budgets + over-budget indicators
@@ -92,4 +92,4 @@ Work one phase per session; `/clear` between phases. Mark items done as you go.
 
 ## Current status
 
-Phase 1 in progress. Running on Expo SDK 54 / React Native 0.81.5 / expo-sqlite 16.0.10 (downgraded from SDK 56 for Expo Go 54 compatibility). Add Expense + History screens done. Next: Summary screen.
+**Phase 1 complete.** Expo SDK 54 / React Native 0.81.5 / expo-sqlite 16.0.10 (downgraded from SDK 56 for Expo Go 54 compatibility). All four Phase 1 items shipped. Shared helpers: `lib/budgetMonth.ts` (getMonthStart, getBudgetMonthBounds), `components/ExpenseForm.tsx` (add + edit), `components/Keypad.tsx`. Next: Phase 2.
