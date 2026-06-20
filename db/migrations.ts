@@ -55,6 +55,11 @@ export async function runMigrations(): Promise<void> {
     await db.runAsync('PRAGMA user_version = 1');
   }
 
-  // Future migrations:
-  // if (version < 2) { ... await db.runAsync('PRAGMA user_version = 2'); }
+  if (version < 2) {
+    // Non-destructive: existing categories become top-level (parent_id = NULL).
+    await db.execAsync(
+      'ALTER TABLE categories ADD COLUMN parent_id INTEGER REFERENCES categories(id)',
+    );
+    await db.runAsync('PRAGMA user_version = 2');
+  }
 }

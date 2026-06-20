@@ -1,5 +1,5 @@
 import * as SQLite from 'expo-sqlite';
-import type { Category, Currency, Expense, ExpenseRow, Settings } from '../types';
+import type { Category, CategoryTree, Currency, Expense, ExpenseRow, Settings } from '../types';
 
 let _db: SQLite.SQLiteDatabase | null = null;
 
@@ -15,6 +15,81 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 export async function getCategories(): Promise<Category[]> {
   const db = await getDatabase();
   return db.getAllAsync<Category>('SELECT * FROM categories ORDER BY name');
+}
+
+export async function getCategoryById(id: number): Promise<Category | null> {
+  const db = await getDatabase();
+  return db.getFirstAsync<Category>('SELECT * FROM categories WHERE id = ?', [id]) ?? null;
+}
+
+export async function getTopCategories(): Promise<Category[]> {
+  const db = await getDatabase();
+  return db.getAllAsync<Category>(
+    'SELECT * FROM categories WHERE parent_id IS NULL ORDER BY name',
+  );
+}
+
+export async function getSubcategories(parentId: number): Promise<Category[]> {
+  const db = await getDatabase();
+  return db.getAllAsync<Category>(
+    'SELECT * FROM categories WHERE parent_id = ? ORDER BY name',
+    [parentId],
+  );
+}
+
+export async function getCategoryTree(): Promise<CategoryTree[]> {
+  const db = await getDatabase();
+  const all = await db.getAllAsync<Category>('SELECT * FROM categories ORDER BY name');
+  const tops = all.filter(c => c.parent_id === null);
+  const byParent = new Map<number, Category[]>();
+  for (const c of all) {
+    if (c.parent_id !== null) {
+      const arr = byParent.get(c.parent_id) ?? [];
+      arr.push(c);
+      byParent.set(c.parent_id, arr);
+    }
+  }
+  return tops.map(c => ({ ...c, children: byParent.get(c.id) ?? [] }));
+}
+
+export async function addCategory(input: {
+  name: string;
+  icon: string | null;
+  color: string;
+  monthly_budget: number | null;
+  parent_id: number | null;
+}): Promise<number> {
+  const db = await getDatabase();
+  const result = await db.runAsync(
+    'INSERT INTO categories (name, icon, color, monthly_budget, parent_id) VALUES (?, ?, ?, ?, ?)',
+    [input.name, input.icon, input.color, input.monthly_budget, input.parent_id],
+  );
+  return result.lastInsertRowId;
+}
+
+export async function updateCategory(
+  id: number,
+  patch: { name: string; icon: string | null; color: string; monthly_budget: number | null },
+): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync(
+    'UPDATE categories SET name = ?, icon = ?, color = ?, monthly_budget = ? WHERE id = ?',
+    [patch.name, patch.icon, patch.color, patch.monthly_budget, id],
+  );
+}
+
+// Throws 'has_children' or 'has_expenses' if deletion is blocked.
+export async function deleteCategory(id: number): Promise<void> {
+  const db = await getDatabase();
+  const children = await db.getFirstAsync<{ n: number }>(
+    'SELECT COUNT(*) AS n FROM categories WHERE parent_id = ?', [id],
+  );
+  if ((children?.n ?? 0) > 0) throw new Error('has_children');
+  const expenses = await db.getFirstAsync<{ n: number }>(
+    'SELECT COUNT(*) AS n FROM expenses WHERE category_id = ?', [id],
+  );
+  if ((expenses?.n ?? 0) > 0) throw new Error('has_expenses');
+  await db.runAsync('DELETE FROM categories WHERE id = ?', [id]);
 }
 
 // ── Settings ─────────────────────────────────────────────────────────────────
