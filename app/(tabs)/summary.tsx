@@ -273,19 +273,19 @@ const styles = StyleSheet.create({
   catBorder: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#e5e5ea' },
   catMeta:   { flexDirection: 'row', alignItems: 'center', marginBottom: 7 },
   pressed:   { opacity: 0.6 },
-  dot:       { width: 10, height: 10, borderRadius: 5, marginRight: 8 },
+  dot:       { width: 10, height: 10, borderRadius: 5, marginEnd: 8 },
   catName:   { flex: 1, fontSize: 14, fontWeight: '500', color: '#1c1c1e' },
-  catPct:    { fontSize: 13, color: '#8e8e93', marginRight: 10 },
+  catPct:    { fontSize: 13, color: '#8e8e93', marginEnd: 10 },
   catAmt:    { fontSize: 14, fontWeight: '600', color: '#1c1c1e' },
-  chevron:     { marginLeft: 6 },
+  chevron:     { marginStart: 6 },
   chevronSlot: { width: 22 }, // keeps amt column aligned on non-expandable rows
 
   barTrack:  { height: 4, backgroundColor: '#f2f2f7', borderRadius: 2, overflow: 'hidden' },
   barFill:   { height: 4, borderRadius: 2 },
 
   subsWrap:  { marginTop: 8, paddingTop: 8, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#e5e5ea' },
-  subHeader: { fontSize: 10, fontWeight: '600', color: '#aeaeb2', letterSpacing: 0.5, marginBottom: 2, paddingLeft: 18 },
-  subRow:    { paddingLeft: 18, paddingVertical: 6 },
-  subDot:    { width: 8, height: 8, borderRadius: 4, marginRight: 8 },
+  subHeader: { fontSize: 10, fontWeight: '600', color: '#aeaeb2', letterSpacing: 0.5, marginBottom: 2, paddingStart: 18 },
+  subRow:    { paddingStart: 18, paddingVertical: 6 },
+  subDot:    { width: 8, height: 8, borderRadius: 4, marginEnd: 8 },
   subName:   { flex: 1, fontSize: 13, color: '#3c3c43' },
 });

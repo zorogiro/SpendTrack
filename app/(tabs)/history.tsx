@@ -176,8 +176,8 @@ const styles = StyleSheet.create({
   rowLast:    { borderBottomLeftRadius: 12, borderBottomRightRadius: 12 },
   rowPressed: { backgroundColor: '#f2f2f7' },
 
-  dot:     { width: 10, height: 10, borderRadius: 5, marginRight: 12 },
-  rowBody: { flex: 1, marginRight: 10 },
+  dot:     { width: 10, height: 10, borderRadius: 5, marginEnd: 12 },
+  rowBody: { flex: 1, marginEnd: 10 },
   rowCat:  { fontSize: 15, fontWeight: '500', color: '#1c1c1e' },
   rowNote: { fontSize: 12, color: '#8e8e93', marginTop: 2 },
   rowAmt:  { fontSize: 15, fontWeight: '600', color: '#1c1c1e' },
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
   separator: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: '#e5e5ea',
-    marginLeft: 38,
+    marginStart: 38,
     marginHorizontal: 16,
   },
 

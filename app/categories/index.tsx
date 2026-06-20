@@ -203,20 +203,20 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   rowPressed: { backgroundColor: '#f0f0f5' },
-  childRow:   { paddingLeft: 36 },
+  childRow:   { paddingStart: 36 },
 
-  dot:      { width: 12, height: 12, borderRadius: 6, marginRight: 12 },
+  dot:      { width: 12, height: 12, borderRadius: 6, marginEnd: 12 },
   childDot: { width: 8, height: 8, borderRadius: 4 },
 
   parentName: { flex: 1, fontSize: 16, fontWeight: '600', color: '#1c1c1e' },
   childName:  { flex: 1, fontSize: 15, fontWeight: '400', color: '#3a3a3c' },
-  budget:     { fontSize: 13, color: '#8e8e93', marginRight: 8 },
+  budget:     { fontSize: 13, color: '#8e8e93', marginEnd: 8 },
 
   addSubBtn:   { paddingHorizontal: 10, paddingVertical: 4, backgroundColor: '#f2f2f7', borderRadius: 10 },
   addSubLabel: { fontSize: 12, fontWeight: '600', color: '#007aff' },
 
-  chevronBtn:  { marginLeft: 10, padding: 4 },
-  chevronSlot: { width: 26, marginLeft: 10 }, // keeps row height & alignment uniform
+  chevronBtn:  { marginStart: 10, padding: 4 },
+  chevronSlot: { width: 26, marginStart: 10 }, // keeps row height & alignment uniform
 
   empty:     { alignItems: 'center', paddingTop: 80 },
   emptyText: { fontSize: 15, color: '#8e8e93', textAlign: 'center', lineHeight: 24 },

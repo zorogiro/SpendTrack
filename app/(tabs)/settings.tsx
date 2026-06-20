@@ -66,5 +66,5 @@ const styles = StyleSheet.create({
   chevron:  { fontSize: 20, color: '#c7c7cc' },
   soon:     { fontSize: 14, color: '#c7c7cc' },
 
-  divider:  { height: StyleSheet.hairlineWidth, backgroundColor: '#e5e5ea', marginLeft: 16 },
+  divider:  { height: StyleSheet.hairlineWidth, backgroundColor: '#e5e5ea', marginStart: 16 },
 });

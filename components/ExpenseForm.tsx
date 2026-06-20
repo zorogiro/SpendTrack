@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
 
   // Collapsed selected row
   selectedRow:   { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 12, minHeight: 52 },
-  selDot:        { width: 10, height: 10, borderRadius: 5, marginRight: 10 },
+  selDot:        { width: 10, height: 10, borderRadius: 5, marginEnd: 10 },
   selectedLabel: { flex: 1, fontSize: 15, fontWeight: '500', color: '#1c1c1e' },
   changeBtn:     { fontSize: 15, color: '#007aff', fontWeight: '500' },
 
@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
   },
   notePrompt: { fontSize: 15, color: '#aaa' },
   noteFilled: { fontSize: 15, color: '#3a3a3c' },
-  noteInput:  { flex: 1, fontSize: 15, color: '#1c1c1e', marginRight: 16 },
+  noteInput:  { flex: 1, fontSize: 15, color: '#1c1c1e', marginEnd: 16 },
   dateLabel:  { fontSize: 15, color: '#007aff', fontWeight: '500' },
 
   saveBtn: {
