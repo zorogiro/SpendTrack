@@ -1,8 +1,9 @@
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { I18nManager, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { getCategoryTree, getExpensesForMonth, getSettings } from '../../db';
 import { getBudgetMonthBounds } from '../../lib/budgetMonth';
 import { fmtTND } from '../../lib/format';
@@ -110,6 +111,7 @@ function buildRollup(rows: ExpenseRow[], tree: CategoryTree[]): ParentTotal[] {
 // ── Screen ────────────────────────────────────────────────────────────────────
 
 export default function SummaryScreen() {
+  const { t } = useTranslation();
   const [totalSpent,   setTotalSpent]   = useState(0);
   const [projected,    setProjected]    = useState(0);
   const [parents,      setParents]      = useState<ParentTotal[]>([]);
@@ -144,7 +146,7 @@ export default function SummaryScreen() {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
         <View style={styles.center}>
-          <Text style={styles.muted}>Loading…</Text>
+          <Text style={styles.muted}>{t('summary.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -156,23 +158,23 @@ export default function SummaryScreen() {
 
         {/* ── Totals card ─────────────────────────────────────────────────── */}
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>SPENT THIS MONTH</Text>
+          <Text style={styles.cardLabel}>{t('summary.spent_this_month')}</Text>
           <Text style={styles.totalAmt}>{fmtTND(totalSpent)} TND</Text>
 
           <View style={styles.divider} />
 
-          <Text style={styles.projLabel}>Projected · at this pace</Text>
+          <Text style={styles.projLabel}>{t('summary.projected_label')}</Text>
           <Text style={styles.projAmt}>{fmtTND(projected)} TND</Text>
         </View>
 
         {/* ── Category breakdown ──────────────────────────────────────────── */}
         {parents.length === 0 ? (
           <View style={styles.emptyCard}>
-            <Text style={styles.muted}>No expenses this month</Text>
+            <Text style={styles.muted}>{t('summary.empty')}</Text>
           </View>
         ) : (
           <View style={styles.card}>
-            <Text style={styles.cardLabel}>BY CATEGORY</Text>
+            <Text style={styles.cardLabel}>{t('summary.by_category')}</Text>
             {parents.map((cat, i) => {
               const isExpanded  = expanded.has(cat.category_id);
               const expandable  = cat.subs.length > 0;
@@ -191,7 +193,7 @@ export default function SummaryScreen() {
                     <Text style={styles.catAmt}>{fmtTND(cat.total)}</Text>
                     {expandable ? (
                       <Ionicons
-                        name={isExpanded ? 'chevron-down' : 'chevron-forward'}
+                        name={isExpanded ? 'chevron-down' : (I18nManager.isRTL ? 'chevron-back' : 'chevron-forward')}
                         size={16}
                         color="#8e8e93"
                         style={styles.chevron}
@@ -212,12 +214,16 @@ export default function SummaryScreen() {
                   {/* Sub-category breakdown */}
                   {isExpanded && (
                     <View style={styles.subsWrap}>
-                      <Text style={styles.subHeader}>% OF {cat.category_name.toUpperCase()}</Text>
+                      <Text style={styles.subHeader}>{t('summary.pct_of_parent', { parent: cat.category_name.toUpperCase() })}</Text>
                       {cat.subs.map(sub => (
                         <View key={sub.key} style={styles.subRow}>
                           <View style={styles.catMeta}>
                             <View style={[styles.subDot, { backgroundColor: sub.category_color }]} />
-                            <Text style={styles.subName} numberOfLines={1}>{sub.category_name}</Text>
+                            <Text style={styles.subName} numberOfLines={1}>
+                              {sub.key.endsWith('-direct')
+                                ? t('summary.direct_label', { name: cat.category_name })
+                                : sub.category_name}
+                            </Text>
                             <Text style={styles.catPct}>{Math.round(sub.shareOfParent * 100)}%</Text>
                             <Text style={styles.catAmt}>{fmtTND(sub.total)}</Text>
                             <View style={styles.chevronSlot} />
@@ -267,19 +273,19 @@ const styles = StyleSheet.create({
   catBorder: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#e5e5ea' },
   catMeta:   { flexDirection: 'row', alignItems: 'center', marginBottom: 7 },
   pressed:   { opacity: 0.6 },
-  dot:       { width: 10, height: 10, borderRadius: 5, marginRight: 8 },
+  dot:       { width: 10, height: 10, borderRadius: 5, marginEnd: 8 },
   catName:   { flex: 1, fontSize: 14, fontWeight: '500', color: '#1c1c1e' },
-  catPct:    { fontSize: 13, color: '#8e8e93', marginRight: 10 },
+  catPct:    { fontSize: 13, color: '#8e8e93', marginEnd: 10 },
   catAmt:    { fontSize: 14, fontWeight: '600', color: '#1c1c1e' },
-  chevron:     { marginLeft: 6 },
+  chevron:     { marginStart: 6 },
   chevronSlot: { width: 22 }, // keeps amt column aligned on non-expandable rows
 
   barTrack:  { height: 4, backgroundColor: '#f2f2f7', borderRadius: 2, overflow: 'hidden' },
   barFill:   { height: 4, borderRadius: 2 },
 
   subsWrap:  { marginTop: 8, paddingTop: 8, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#e5e5ea' },
-  subHeader: { fontSize: 10, fontWeight: '600', color: '#aeaeb2', letterSpacing: 0.5, marginBottom: 2, paddingLeft: 18 },
-  subRow:    { paddingLeft: 18, paddingVertical: 6 },
-  subDot:    { width: 8, height: 8, borderRadius: 4, marginRight: 8 },
+  subHeader: { fontSize: 10, fontWeight: '600', color: '#aeaeb2', letterSpacing: 0.5, marginBottom: 2, paddingStart: 18 },
+  subRow:    { paddingStart: 18, paddingVertical: 6 },
+  subDot:    { width: 8, height: 8, borderRadius: 4, marginEnd: 8 },
   subName:   { flex: 1, fontSize: 13, color: '#3c3c43' },
 });

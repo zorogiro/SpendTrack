@@ -1,0 +1,74 @@
+{
+  "common": {
+    "today": "Aujourd'hui",
+    "yesterday": "Hier"
+  },
+  "categories": {
+    "title": "Catégories",
+    "add_sub": "+ sous-cat",
+    "budget_label": "{{amount}} TND/mois",
+    "empty": "Aucune catégorie.\nAppuyez sur ＋ pour en ajouter une.",
+    "delete_title": "Supprimer la catégorie ?",
+    "delete_cancel": "Annuler",
+    "delete_confirm": "Supprimer",
+    "cannot_delete_title": "Impossible de supprimer",
+    "block_has_children": "Supprimez d'abord toutes les sous-catégories.",
+    "block_has_expenses": "Cette catégorie contient des dépenses — réaffectez-les ou supprimez-les d'abord.",
+    "delete_error": "Impossible de supprimer la catégorie.",
+    "new_title": "Nouvelle catégorie",
+    "edit_title": "Modifier la catégorie",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "field_name": "NOM",
+    "field_icon": "ICÔNE (EMOJI, OPTIONNEL)",
+    "field_color": "COULEUR",
+    "field_budget": "BUDGET MENSUEL (TND, OPTIONNEL)",
+    "name_placeholder": "Nom de la catégorie",
+    "icon_placeholder": "ex. 🍽️",
+    "budget_placeholder": "Laisser vide pour aucun budget",
+    "save_error_title": "Erreur",
+    "save_error_message": "Impossible d'enregistrer. Veuillez réessayer."
+  },
+  "expense": {
+    "save": "ENREGISTRER",
+    "update": "MODIFIER",
+    "change": "Modifier",
+    "breadcrumb": "← {{parent}}",
+    "more": "Plus ›",
+    "note_placeholder": "Ajouter une note…",
+    "add_note": "+ Ajouter une note",
+    "selected_label": "{{parent}} → {{child}}"
+  },
+  "summary": {
+    "loading": "Chargement…",
+    "spent_this_month": "DÉPENSÉ CE MOIS",
+    "projected_label": "Projeté · à ce rythme",
+    "empty": "Aucune dépense ce mois-ci",
+    "by_category": "PAR CATÉGORIE",
+    "pct_of_parent": "% DE {{parent}}",
+    "direct_label": "{{name}} (direct)"
+  },
+  "history": {
+    "loading": "Chargement…",
+    "this_month": "CE MOIS",
+    "empty": "Aucune dépense ce mois-ci",
+    "delete_title": "Supprimer la dépense ?",
+    "delete_message": "{{amount}} {{currency}} · {{category}}",
+    "delete_cancel": "Annuler",
+    "delete_confirm": "Supprimer"
+  },
+  "settings": {
+    "manage": "GÉRER",
+    "categories_budgets": "Catégories et budgets",
+    "preferences": "PRÉFÉRENCES",
+    "language_label": "Langue",
+    "follow_device": "Langue du système",
+    "restart_title": "Redémarrage requis",
+    "restart_body": "L'application va redémarrer pour appliquer la langue.",
+    "eur_tnd_rate": "Taux EUR → TND",
+    "month_start_day": "Jour de début du mois",
+    "data": "DONNÉES",
+    "export_csv": "Exporter en CSV",
+    "coming_soon": "Bientôt disponible"
+  }
+}

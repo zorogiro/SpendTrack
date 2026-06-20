@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 
@@ -44,6 +45,7 @@ interface Props {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function CategoryForm({ initial, onSave, onCancel }: Props) {
+  const { t } = useTranslation();
   const [name, setName]     = useState(initial?.name ?? '');
   const [icon, setIcon]     = useState(initial?.icon ?? '');
   const [color, setColor]   = useState(initial?.color ?? PALETTE[0]);
@@ -66,7 +68,7 @@ export default function CategoryForm({ initial, onSave, onCancel }: Props) {
         monthly_budget: budget.trim() && !isNaN(raw) ? raw : null,
       });
     } catch {
-      Alert.alert('Error', 'Could not save. Please try again.');
+      Alert.alert(t('categories.save_error_title'), t('categories.save_error_message'));
     } finally {
       setSaving(false);
     }
@@ -79,24 +81,24 @@ export default function CategoryForm({ initial, onSave, onCancel }: Props) {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={onCancel} hitSlop={12}>
-            <Text style={styles.cancel}>Cancel</Text>
+            <Text style={styles.cancel}>{t('categories.cancel')}</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{initial ? 'Edit Category' : 'New Category'}</Text>
+          <Text style={styles.headerTitle}>{initial ? t('categories.edit_title') : t('categories.new_title')}</Text>
           <TouchableOpacity onPress={handleSave} disabled={!canSave} hitSlop={12}>
-            <Text style={[styles.save, !canSave && styles.saveOff]}>Save</Text>
+            <Text style={[styles.save, !canSave && styles.saveOff]}>{t('categories.save')}</Text>
           </TouchableOpacity>
         </View>
 
         <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps="handled">
 
           <View style={styles.section}>
-            <Text style={styles.label}>NAME</Text>
+            <Text style={styles.label}>{t('categories.field_name')}</Text>
             <View style={styles.card}>
               <TextInput
                 style={styles.input}
                 value={name}
                 onChangeText={setName}
-                placeholder="Category name"
+                placeholder={t('categories.name_placeholder')}
                 placeholderTextColor="#aaa"
                 autoFocus={!initial}
                 returnKeyType="done"
@@ -105,13 +107,13 @@ export default function CategoryForm({ initial, onSave, onCancel }: Props) {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.label}>ICON (EMOJI, OPTIONAL)</Text>
+            <Text style={styles.label}>{t('categories.field_icon')}</Text>
             <View style={styles.card}>
               <TextInput
                 style={styles.input}
                 value={icon}
                 onChangeText={setIcon}
-                placeholder="e.g. 🍽️"
+                placeholder={t('categories.icon_placeholder')}
                 placeholderTextColor="#aaa"
                 returnKeyType="done"
               />
@@ -119,7 +121,7 @@ export default function CategoryForm({ initial, onSave, onCancel }: Props) {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.label}>COLOR</Text>
+            <Text style={styles.label}>{t('categories.field_color')}</Text>
             <View style={[styles.card, styles.paletteCard]}>
               {PALETTE.map(c => (
                 <TouchableOpacity
@@ -133,13 +135,13 @@ export default function CategoryForm({ initial, onSave, onCancel }: Props) {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.label}>MONTHLY BUDGET (TND, OPTIONAL)</Text>
+            <Text style={styles.label}>{t('categories.field_budget')}</Text>
             <View style={styles.card}>
               <TextInput
                 style={styles.input}
                 value={budget}
                 onChangeText={setBudget}
-                placeholder="Leave blank for no budget"
+                placeholder={t('categories.budget_placeholder')}
                 placeholderTextColor="#aaa"
                 keyboardType="decimal-pad"
                 returnKeyType="done"

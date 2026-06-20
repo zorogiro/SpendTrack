@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   FlatList,
+  I18nManager,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -11,6 +12,7 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import Keypad from './Keypad';
 import { addExpense, getCategoryTree, getRecentCategories, getSettings, updateExpense } from '../db';
 import { formatDateLabel } from '../lib/format';
@@ -71,6 +73,7 @@ function findLeaf(
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function ExpenseForm({ initial, onSave }: Props) {
+  const { t } = useTranslation();
   const isEdit = initial !== undefined;
 
   const [amountStr, setAmountStr]           = useState(isEdit ? String(initial!.amount) : '0');
@@ -187,7 +190,9 @@ export default function ExpenseForm({ initial, onSave }: Props) {
   // Derive selected category label for the collapsed row.
   const found = findLeaf(tree, categoryId);
   const selectedLabel = found
-    ? (found.parent ? `${found.parent.name} → ${found.cat.name}` : found.cat.name)
+    ? (found.parent
+        ? t('expense.selected_label', { parent: found.parent.name, child: found.cat.name })
+        : found.cat.name)
     : '…';  // placeholder while tree loads; never crashes (clarification 2)
 
   return (
@@ -226,7 +231,7 @@ export default function ExpenseForm({ initial, onSave }: Props) {
             {found && <View style={[styles.selDot, { backgroundColor: found.cat.color }]} />}
             <Text style={styles.selectedLabel} numberOfLines={1}>{selectedLabel}</Text>
             <TouchableOpacity onPress={() => setShowPicker(true)} hitSlop={10}>
-              <Text style={styles.changeBtn}>Change</Text>
+              <Text style={styles.changeBtn}>{t('expense.change')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -241,7 +246,7 @@ export default function ExpenseForm({ initial, onSave }: Props) {
                 style={styles.breadcrumb}
                 onPress={() => setPickerStage('parents')}
               >
-                <Text style={styles.breadcrumbText}>← {browseParent.name}</Text>
+                <Text style={styles.breadcrumbText}>{t('expense.breadcrumb', { parent: browseParent.name })}</Text>
               </TouchableOpacity>
             )}
 
@@ -269,7 +274,7 @@ export default function ExpenseForm({ initial, onSave }: Props) {
                     {item.icon ? <Text style={styles.chipIcon}>{item.icon}</Text> : null}
                     <Text style={styles.chipLabel}>{item.name}</Text>
                     {effectiveStage === 'parents' && parentIdsWithChildren.has(item.id) && (
-                      <Text style={styles.chipArrow}>›</Text>
+                      <Text style={styles.chipArrow}>{I18nManager.isRTL ? '‹' : '›'}</Text>
                     )}
                   </TouchableOpacity>
                 )}
@@ -281,7 +286,7 @@ export default function ExpenseForm({ initial, onSave }: Props) {
                   style={styles.sideBtn}
                   onPress={() => setPickerStage('parents')}
                 >
-                  <Text style={styles.moreBtnText}>More ›</Text>
+                  <Text style={styles.moreBtnText}>{t('expense.more')}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -297,7 +302,7 @@ export default function ExpenseForm({ initial, onSave }: Props) {
               style={styles.noteInput}
               value={note}
               onChangeText={setNote}
-              placeholder="Add a note…"
+              placeholder={t('expense.note_placeholder')}
               placeholderTextColor="#aaa"
               returnKeyType="done"
               onSubmitEditing={() => setNoteVisible(false)}
@@ -307,7 +312,7 @@ export default function ExpenseForm({ initial, onSave }: Props) {
           ) : (
             <TouchableOpacity onPress={() => setNoteVisible(true)}>
               <Text style={note.trim() ? styles.noteFilled : styles.notePrompt}>
-                {note.trim() || '+ Add note'}
+                {note.trim() || t('expense.add_note')}
               </Text>
             </TouchableOpacity>
           )}
@@ -341,7 +346,7 @@ export default function ExpenseForm({ initial, onSave }: Props) {
           disabled={!canSave}
           activeOpacity={0.85}
         >
-          <Text style={styles.saveBtnLabel}>{isEdit ? 'UPDATE' : 'SAVE'}</Text>
+          <Text style={styles.saveBtnLabel}>{isEdit ? t('expense.update') : t('expense.save')}</Text>
         </TouchableOpacity>
 
       </KeyboardAvoidingView>
@@ -364,7 +369,7 @@ const styles = StyleSheet.create({
 
   // Collapsed selected row
   selectedRow:   { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 12, minHeight: 52 },
-  selDot:        { width: 10, height: 10, borderRadius: 5, marginRight: 10 },
+  selDot:        { width: 10, height: 10, borderRadius: 5, marginEnd: 10 },
   selectedLabel: { flex: 1, fontSize: 15, fontWeight: '500', color: '#1c1c1e' },
   changeBtn:     { fontSize: 15, color: '#007aff', fontWeight: '500' },
 
@@ -392,7 +397,7 @@ const styles = StyleSheet.create({
   },
   notePrompt: { fontSize: 15, color: '#aaa' },
   noteFilled: { fontSize: 15, color: '#3a3a3c' },
-  noteInput:  { flex: 1, fontSize: 15, color: '#1c1c1e', marginRight: 16 },
+  noteInput:  { flex: 1, fontSize: 15, color: '#1c1c1e', marginEnd: 16 },
   dateLabel:  { fontSize: 15, color: '#007aff', fontWeight: '500' },
 
   saveBtn: {

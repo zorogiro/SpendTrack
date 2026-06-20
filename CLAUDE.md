@@ -35,12 +35,13 @@ Logging must be near-frictionless — the Add Expense flow should take ~3 taps m
 
 **recurring**: id (pk), amount, currency, category_id (fk), note (nullable), frequency ('monthly'|'weekly'), day_of_month (int, nullable), day_of_week (int, nullable), start_date (ISO), end_date (ISO, nullable), last_generated_date (ISO, nullable). *(Table exists in schema; recurring feature not yet built.)*
 
-**settings** (single row, pinned `id = 1` with `CHECK(id = 1)`): base_currency (default 'TND'), eur_to_tnd_rate (real), month_start_day (int, default 1).
+**settings** (single row, pinned `id = 1` with `CHECK(id = 1)`): base_currency (default 'TND'), eur_to_tnd_rate (real), month_start_day (int, default 1), language (text, nullable; NULL = follow device locale, 'en'|'fr'|'ar' = user override).
 
 ### Schema migrations
 
 - **v1** — initial schema: categories, settings, recurring, expenses. PRAGMA `user_version` gates migrations.
 - **v2** — `ALTER TABLE categories ADD COLUMN parent_id INTEGER REFERENCES categories(id)` (non-destructive; existing rows become top-level).
+- **v3** — `ALTER TABLE settings ADD COLUMN language TEXT` (non-destructive; existing row gets NULL = device locale).
 
 ## Budget month window
 
@@ -72,21 +73,32 @@ projected_month_total = projected_var + remaining_recurring
 3. **Summary** — `app/(tabs)/summary.tsx`. Total-spent + projection cards (unchanged by category logic). Category breakdown **rolls sub-categories up under their top-level parent**: one bar per parent (share of month), expandable to sub-rows (share of parent). When a parent has both direct and sub expenses, a synthetic "(direct)" remainder row keeps sub-rows summing to the parent total. Empty-month "No expenses" card. CSS-width bars, no chart library.
 4. **Categories & Budgets** — `app/categories/index.tsx` (tree list: parents + indented subs, "+ sub" per parent), `app/categories/new.tsx` (create; optional `?parentId=`), `app/categories/[id].tsx` (edit). Shared `components/CategoryForm.tsx`. Reached from the Settings hub.
 5. **Recurring** — manage recurring expenses; generate due entries on launch. *(Not yet built.)*
-6. **Settings** — `app/(tabs)/settings.tsx`, a hub. Links to Categories & Budgets; placeholder rows for base currency, EUR→TND rate, month start day, CSV export.
+6. **Settings** — `app/(tabs)/settings.tsx`, a hub. Links to Categories & Budgets. Language picker in Preferences row: slide-up bottom sheet with English / Français / العربية / Follow device, checkmark on current selection. Switching en↔fr is a live update via `i18next.changeLanguage`; switching to/from Arabic calls `I18nManager.forceRTL` + `Updates.reloadAsync()` (requires `expo-updates`). Placeholder rows for EUR→TND rate, month start day, CSV export.
 
 ## DB layer (`db/index.ts`)
 
 All SQL lives here; screens never write raw SQL. Key helpers shipped:
 - Expenses: `addExpense` (stamps created_at), `updateExpense`, `getExpense` (→ `Expense | null`), `deleteExpense`, `getExpensesForMonth(monthStartISO)` (JOIN → `ExpenseRow[]`).
 - Categories: `getCategories`, `getCategoryById`, `getTopCategories`, `getSubcategories`, `getCategoryTree` (→ `CategoryTree[]`), `getRecentCategories(limit, days)`, `addCategory`, `updateCategory` (no reparenting), `deleteCategory` (throws on block).
-- Settings: `getSettings`, `updateSettings`. Migrations + seed run on app launch (`app/_layout.tsx`); seed is idempotent (`INSERT OR IGNORE`).
+- Settings: `getSettings`, `updateSettings` (COALESCE patch — cannot write NULL to `language`), `clearLanguageOverride` (direct `UPDATE SET language = NULL` — required for "Follow device" reset). Migrations + seed run on app launch (`app/_layout.tsx`); seed is idempotent (`INSERT OR IGNORE`).
+
+## Internationalisation (`lib/i18n.ts`)
+
+- Packages: `i18next`, `react-i18next`, `expo-localization`, `expo-updates` (for `Updates.reloadAsync()` on RTL switch).
+- Supported locales: `'en' | 'fr' | 'ar'`. Strings live in `locales/{en,fr,ar}.json`.
+- Key namespace convention: `screen.key` (e.g. `settings.manage`). Use this for all future screens.
+- `initI18n(overrideLanguage?)` is called once in `app/_layout.tsx` after migrations, before `setReady(true)`. It reads `settings.language`; if NULL it falls back to `expo-localization` device detection → `'en'` if unsupported. `detectLocale()` is exported for use in the language picker.
+- `<I18nextProvider>` wraps `<Stack>` in the root layout; screens use `useTranslation()`.
+- **Language picker** ships in `app/(tabs)/settings.tsx`. Selecting en/fr/ar writes `settings.language`; "Follow device" calls `clearLanguageOverride()` (sets NULL). en↔fr switches call `i18next.changeLanguage` live (no reload). To/from Arabic: calls `I18nManager.forceRTL(bool)` then `Updates.reloadAsync()`. DB is written before `forceRTL` so a dismissed Alert or Expo Go no-op leaves the app in a recoverable state — next launch corrects everything.
+- **RTL layout prep done:** all physical `marginLeft/Right`, `paddingLeft/Right` converted to logical `marginStart/End`, `paddingStart/End`; directional chars (←›) made conditional on `I18nManager.isRTL`; Ionicons chevrons use `isRTL` ternary; Keypad locked `direction: 'ltr'` so digit rows never flip. Full RTL layout pass still pending (test on device after enabling Arabic).
+- `COALESCE(null, language)` cannot write NULL through `updateSettings` — this is resolved by `clearLanguageOverride()` in `db/index.ts`. Do not route "Follow device" through `updateSettings`.
 
 ## Conventions
 
 - TypeScript strict. Functional components + hooks.
 - Keep DB access in `db/`; screens never write raw SQL inline.
 - Schema changes go through the migrations file with a `user_version` bump; non-destructive.
-- Shared logic lives in one place (e.g. `lib/budgetMonth.ts`, shared form components) — never duplicate the budget-window or form logic.
+- Shared logic lives in one place (e.g. `lib/budgetMonth.ts`, `lib/i18n.ts`, shared form components) — never duplicate.
 - Dates always zero-padded `YYYY-MM-DD` so string comparisons in WHERE clauses are reliable.
 - Small, reviewable commits — one screen/feature per commit. Commit + push after each item (off-device backup).
 
@@ -124,8 +136,10 @@ Work one item per session; `/clear` between items. Mark items done as you go.
 
 **Phase 2 in progress. Phase 1 complete.** The sub-category feature is complete end to end: schema (v2 `parent_id`), Categories management (`app/categories/` + `components/CategoryForm.tsx`), two-level Add Expense picker with a recents row (`components/ExpenseForm.tsx`, `getRecentCategories`), and the Summary parent-rollup with expand-to-sub and the synthetic "(direct)" remainder row. Budget-month window shared via `lib/budgetMonth.ts`.
 
+i18n is complete end to end: v3 migration (`settings.language`), `lib/i18n.ts` + `lib/format.ts` locale-aware, string extraction across all screens (EN/FR/AR), language picker in Settings with `forceRTL` + `expo-updates` reload, `clearLanguageOverride` NULL-write fix, RTL layout prep (logical styles + directional chars + keypad lock). Full RTL layout pass (visual verification on Arabic device) is the remaining i18n work.
+
 Remaining Phase 2: per-category budgets / over-budget indicators, recurring expenses (also upgrades the projection to recurring-aware), charts, CSV export.
 
-**Next item: TBD** — using the app on real spending for a stretch before picking, so the priority order reflects what actually annoys in daily use (likely recurring vs. budgets).
+**Next item: TBD** — using the app on real spending before picking, so the priority reflects what actually annoys in daily use (likely recurring vs. budgets).
 
 *(Housekeeping: verify the Expo SDK version and fix the Stack section — notes showed both 54 and 56.)*

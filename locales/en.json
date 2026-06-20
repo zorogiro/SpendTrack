@@ -1,0 +1,74 @@
+{
+  "common": {
+    "today": "Today",
+    "yesterday": "Yesterday"
+  },
+  "categories": {
+    "title": "Categories",
+    "add_sub": "+ sub",
+    "budget_label": "{{amount}} TND/mo",
+    "empty": "No categories yet.\nTap ＋ to add one.",
+    "delete_title": "Delete category?",
+    "delete_cancel": "Cancel",
+    "delete_confirm": "Delete",
+    "cannot_delete_title": "Cannot delete",
+    "block_has_children": "Remove all sub-categories first.",
+    "block_has_expenses": "This category has expenses — reassign or delete them first.",
+    "delete_error": "Could not delete category.",
+    "new_title": "New Category",
+    "edit_title": "Edit Category",
+    "cancel": "Cancel",
+    "save": "Save",
+    "field_name": "NAME",
+    "field_icon": "ICON (EMOJI, OPTIONAL)",
+    "field_color": "COLOR",
+    "field_budget": "MONTHLY BUDGET (TND, OPTIONAL)",
+    "name_placeholder": "Category name",
+    "icon_placeholder": "e.g. 🍽️",
+    "budget_placeholder": "Leave blank for no budget",
+    "save_error_title": "Error",
+    "save_error_message": "Could not save. Please try again."
+  },
+  "expense": {
+    "save": "SAVE",
+    "update": "UPDATE",
+    "change": "Change",
+    "breadcrumb": "← {{parent}}",
+    "more": "More ›",
+    "note_placeholder": "Add a note…",
+    "add_note": "+ Add note",
+    "selected_label": "{{parent}} → {{child}}"
+  },
+  "summary": {
+    "loading": "Loading…",
+    "spent_this_month": "SPENT THIS MONTH",
+    "projected_label": "Projected · at this pace",
+    "empty": "No expenses this month",
+    "by_category": "BY CATEGORY",
+    "pct_of_parent": "% OF {{parent}}",
+    "direct_label": "{{name}} (direct)"
+  },
+  "history": {
+    "loading": "Loading…",
+    "this_month": "THIS MONTH",
+    "empty": "No expenses this month",
+    "delete_title": "Delete expense?",
+    "delete_message": "{{amount}} {{currency}} · {{category}}",
+    "delete_cancel": "Cancel",
+    "delete_confirm": "Delete"
+  },
+  "settings": {
+    "manage": "MANAGE",
+    "categories_budgets": "Categories & Budgets",
+    "preferences": "PREFERENCES",
+    "language_label": "Language",
+    "follow_device": "Follow device",
+    "restart_title": "Restart required",
+    "restart_body": "The app will restart to apply the language.",
+    "eur_tnd_rate": "EUR → TND Rate",
+    "month_start_day": "Month Start Day",
+    "data": "DATA",
+    "export_csv": "Export CSV",
+    "coming_soon": "Coming soon"
+  }
+}

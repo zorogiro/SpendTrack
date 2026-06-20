@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { Alert, Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { deleteExpense, getExpensesForMonth, getSettings } from '../../db';
 import { getMonthStart } from '../../lib/budgetMonth';
 import { fmtTND, formatDateLabel } from '../../lib/format';
@@ -14,6 +15,7 @@ type Section = { date: string; dayTotal: number; data: ExpenseRow[] };
 // ── Screen ────────────────────────────────────────────────────────────────────
 
 export default function HistoryScreen() {
+  const { t } = useTranslation();
   const [sections, setSections]         = useState<Section[]>([]);
   const [mtdTotal, setMtdTotal]         = useState(0);
   const [bootstrapped, setBootstrapped] = useState(false);
@@ -45,12 +47,12 @@ export default function HistoryScreen() {
 
   const confirmDelete = useCallback((item: ExpenseRow) => {
     Alert.alert(
-      'Delete expense?',
-      `${fmtTND(item.amount)} ${item.currency} · ${item.category_name}`,
+      t('history.delete_title'),
+      t('history.delete_message', { amount: fmtTND(item.amount), currency: item.currency, category: item.category_name }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('history.delete_cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('history.delete_confirm'),
           style: 'destructive',
           onPress: async () => {
             await deleteExpense(item.id);
@@ -59,13 +61,13 @@ export default function HistoryScreen() {
         },
       ],
     );
-  }, [load]);
+  }, [load, t]);
 
   if (!bootstrapped) {
     return (
       <SafeAreaView style={styles.root} edges={['top']}>
         <View style={styles.center}>
-          <Text style={styles.muted}>Loading…</Text>
+          <Text style={styles.muted}>{t('history.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -80,7 +82,7 @@ export default function HistoryScreen() {
         contentContainerStyle={sections.length === 0 ? styles.emptyContainer : styles.listContent}
         ListHeaderComponent={
           <View style={styles.mtdCard}>
-            <Text style={styles.mtdLabel}>THIS MONTH</Text>
+            <Text style={styles.mtdLabel}>{t('history.this_month')}</Text>
             <Text style={styles.mtdAmount}>{fmtTND(mtdTotal)} TND</Text>
           </View>
         }
@@ -121,7 +123,7 @@ export default function HistoryScreen() {
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={
           <View style={styles.center}>
-            <Text style={styles.muted}>No expenses this month</Text>
+            <Text style={styles.muted}>{t('history.empty')}</Text>
           </View>
         }
       />
@@ -174,8 +176,8 @@ const styles = StyleSheet.create({
   rowLast:    { borderBottomLeftRadius: 12, borderBottomRightRadius: 12 },
   rowPressed: { backgroundColor: '#f2f2f7' },
 
-  dot:     { width: 10, height: 10, borderRadius: 5, marginRight: 12 },
-  rowBody: { flex: 1, marginRight: 10 },
+  dot:     { width: 10, height: 10, borderRadius: 5, marginEnd: 12 },
+  rowBody: { flex: 1, marginEnd: 10 },
   rowCat:  { fontSize: 15, fontWeight: '500', color: '#1c1c1e' },
   rowNote: { fontSize: 12, color: '#8e8e93', marginTop: 2 },
   rowAmt:  { fontSize: 15, fontWeight: '600', color: '#1c1c1e' },
@@ -183,7 +185,7 @@ const styles = StyleSheet.create({
   separator: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: '#e5e5ea',
-    marginLeft: 38,
+    marginStart: 38,
     marginHorizontal: 16,
   },
 

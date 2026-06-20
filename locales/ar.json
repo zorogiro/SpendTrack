@@ -1,0 +1,74 @@
+{
+  "common": {
+    "today": "اليوم",
+    "yesterday": "أمس"
+  },
+  "categories": {
+    "title": "الفئات",
+    "add_sub": "+ فرعية",
+    "budget_label": "{{amount}} TND/شهر",
+    "empty": "لا توجد فئات بعد.\nاضغط ＋ لإضافة فئة.",
+    "delete_title": "حذف الفئة؟",
+    "delete_cancel": "إلغاء",
+    "delete_confirm": "حذف",
+    "cannot_delete_title": "لا يمكن الحذف",
+    "block_has_children": "احذف جميع الفئات الفرعية أولاً.",
+    "block_has_expenses": "هذه الفئة بها مصاريف — أعد تعيينها أو احذفها أولاً.",
+    "delete_error": "تعذّر حذف الفئة.",
+    "new_title": "فئة جديدة",
+    "edit_title": "تعديل الفئة",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "field_name": "الاسم",
+    "field_icon": "الأيقونة (إيموجي، اختياري)",
+    "field_color": "اللون",
+    "field_budget": "الميزانية الشهرية (TND، اختيارية)",
+    "name_placeholder": "اسم الفئة",
+    "icon_placeholder": "مثال: 🍽️",
+    "budget_placeholder": "اتركه فارغاً لعدم تحديد ميزانية",
+    "save_error_title": "خطأ",
+    "save_error_message": "تعذّر الحفظ. يرجى المحاولة مجدداً."
+  },
+  "expense": {
+    "save": "حفظ",
+    "update": "تحديث",
+    "change": "تغيير",
+    "breadcrumb": "→ {{parent}}",
+    "more": "‹ المزيد",
+    "note_placeholder": "أضف ملاحظة…",
+    "add_note": "+ أضف ملاحظة",
+    "selected_label": "{{child}} ← {{parent}}"
+  },
+  "summary": {
+    "loading": "جارٍ التحميل…",
+    "spent_this_month": "المصروف هذا الشهر",
+    "projected_label": "متوقع · بهذه الوتيرة",
+    "empty": "لا توجد مصاريف هذا الشهر",
+    "by_category": "حسب الفئة",
+    "pct_of_parent": "% من {{parent}}",
+    "direct_label": "{{name}} (مباشر)"
+  },
+  "history": {
+    "loading": "جارٍ التحميل…",
+    "this_month": "هذا الشهر",
+    "empty": "لا توجد مصاريف هذا الشهر",
+    "delete_title": "حذف المصروف؟",
+    "delete_message": "{{amount}} {{currency}} · {{category}}",
+    "delete_cancel": "إلغاء",
+    "delete_confirm": "حذف"
+  },
+  "settings": {
+    "manage": "إدارة",
+    "categories_budgets": "الفئات والميزانيات",
+    "preferences": "التفضيلات",
+    "language_label": "اللغة",
+    "follow_device": "تلقائي",
+    "restart_title": "إعادة التشغيل مطلوبة",
+    "restart_body": "سيُعاد تشغيل التطبيق لتطبيق اللغة.",
+    "eur_tnd_rate": "سعر اليورو بالدينار",
+    "month_start_day": "يوم بداية الشهر",
+    "data": "البيانات",
+    "export_csv": "تصدير CSV",
+    "coming_soon": "قريباً"
+  }
+}

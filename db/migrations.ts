@@ -62,4 +62,12 @@ export async function runMigrations(): Promise<void> {
     );
     await db.runAsync('PRAGMA user_version = 2');
   }
+
+  if (version < 3) {
+    // NULL = follow device locale; 'en'|'fr'|'ar' = user override.
+    await db.execAsync(
+      'ALTER TABLE settings ADD COLUMN language TEXT',
+    );
+    await db.runAsync('PRAGMA user_version = 3');
+  }
 }

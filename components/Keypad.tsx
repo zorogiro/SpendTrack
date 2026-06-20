@@ -31,7 +31,7 @@ export default function Keypad({ onKey }: Props) {
 }
 
 const styles = StyleSheet.create({
-  grid:  { flex: 1, padding: 4 },
+  grid:  { flex: 1, padding: 4, direction: 'ltr' },
   row:   { flex: 1, flexDirection: 'row' },
   key:   {
     flex: 1,
