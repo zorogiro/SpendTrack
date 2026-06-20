@@ -41,3 +41,9 @@ export interface Settings {
   eur_to_tnd_rate: number;
   month_start_day: number;
 }
+
+export interface ExpenseRow extends Expense {
+  category_name: string;
+  category_color: string;
+  category_icon: string | null;
+}

@@ -74,7 +74,9 @@ Work one phase per session; `/clear` between phases. Mark items done as you go.
 **Phase 1 — MVP**
 - [x] Scaffold Expo + TS app, tab navigator, expo-sqlite + migrations, seed default categories
 - [x] Add Expense screen (fast; compute amount_base on save)
-- [ ] History screen with running totals
+- [x] History screen with running totals
+- [x] Delete an expense from History (deleteExpense helper + confirm step)
+- [x] Edit an expense (reuse Add Expense form in edit mode + updateExpense helper)
 - [ ] Summary screen with simple projection
 
 **Phase 2 — sticky**
@@ -90,4 +92,4 @@ Work one phase per session; `/clear` between phases. Mark items done as you go.
 
 ## Current status
 
-Phase 1 in progress. Scaffold done (Expo SDK 56, React Native 0.85.3, expo-sqlite 56.0.5 async API, Expo Router file-based nav, DB migrations + seed). Next action: Add Expense screen.
+Phase 1 in progress. Running on Expo SDK 54 / React Native 0.81.5 / expo-sqlite 16.0.10 (downgraded from SDK 56 for Expo Go 54 compatibility). Add Expense + History screens done. Next: Summary screen.

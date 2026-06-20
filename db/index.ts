@@ -1,5 +1,5 @@
 import * as SQLite from 'expo-sqlite';
-import type { Category, Currency, Settings } from '../types';
+import type { Category, Currency, Expense, ExpenseRow, Settings } from '../types';
 
 let _db: SQLite.SQLiteDatabase | null = null;
 
@@ -45,6 +45,48 @@ export async function updateSettings(
 }
 
 // ── Expenses ─────────────────────────────────────────────────────────────────
+
+export async function getExpense(id: number): Promise<Expense | null> {
+  const db = await getDatabase();
+  return db.getFirstAsync<Expense>('SELECT * FROM expenses WHERE id = ?', [id]) ?? null;
+}
+
+export async function updateExpense(
+  id: number,
+  input: {
+    amount: number;
+    currency: Currency;
+    amount_base: number;
+    category_id: number;
+    note: string | null;
+    date: string;
+  },
+): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync(
+    `UPDATE expenses
+     SET amount = ?, currency = ?, amount_base = ?, category_id = ?, note = ?, date = ?
+     WHERE id = ?`,
+    [input.amount, input.currency, input.amount_base, input.category_id, input.note, input.date, id],
+  );
+}
+
+export async function getExpensesForMonth(monthStartISO: string): Promise<ExpenseRow[]> {
+  const db = await getDatabase();
+  return db.getAllAsync<ExpenseRow>(
+    `SELECT e.*, c.name AS category_name, c.color AS category_color, c.icon AS category_icon
+     FROM expenses e
+     JOIN categories c ON c.id = e.category_id
+     WHERE e.date >= ?
+     ORDER BY e.date DESC, e.created_at DESC`,
+    [monthStartISO],
+  );
+}
+
+export async function deleteExpense(id: number): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync('DELETE FROM expenses WHERE id = ?', [id]);
+}
 
 export async function addExpense(input: {
   amount: number;

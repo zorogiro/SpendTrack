@@ -1,16 +1,229 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Alert, Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { deleteExpense, getExpensesForMonth, getSettings } from '../../db';
+import type { ExpenseRow } from '../../types';
+
+// ── Pure helpers ──────────────────────────────────────────────────────────────
+
+function pad(n: number): string {
+  return String(n).padStart(2, '0');
+}
+
+function getMonthStart(monthStartDay: number): string {
+  const today = new Date();
+  let year = today.getFullYear();
+  let month = today.getMonth(); // 0-indexed
+
+  if (today.getDate() < monthStartDay) {
+    month -= 1;
+    if (month < 0) { month = 11; year -= 1; }
+  }
+
+  // Clamp to last actual day of that month (handles e.g. day=31 in Feb/Apr)
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  const day = Math.min(monthStartDay, lastDay);
+
+  return `${year}-${pad(month + 1)}-${pad(day)}`;
+}
+
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] as const;
+
+function formatDate(iso: string): string {
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+  if (iso === todayStr) return 'Today';
+  const [, m, d] = iso.split('-');
+  return `${parseInt(d, 10)} ${MONTHS[parseInt(m, 10) - 1]}`;
+}
+
+function fmtAmt(n: number): string {
+  const [int, dec] = n.toFixed(2).split('.');
+  return `${int.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}.${dec}`;
+}
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type Section = { date: string; dayTotal: number; data: ExpenseRow[] };
+
+// ── Screen ────────────────────────────────────────────────────────────────────
 
 export default function HistoryScreen() {
+  const [sections, setSections]         = useState<Section[]>([]);
+  const [mtdTotal, setMtdTotal]         = useState(0);
+  const [bootstrapped, setBootstrapped] = useState(false);
+
+  const load = useCallback(async () => {
+    const settings = await getSettings();
+    const monthStart = getMonthStart(settings.month_start_day);
+    const rows = await getExpensesForMonth(monthStart);
+
+    setMtdTotal(rows.reduce((s, e) => s + e.amount_base, 0));
+
+    // Group by date — rows already arrive date DESC, created_at DESC
+    const map = new Map<string, ExpenseRow[]>();
+    for (const e of rows) {
+      const arr = map.get(e.date) ?? [];
+      arr.push(e);
+      map.set(e.date, arr);
+    }
+
+    const grouped: Section[] = [];
+    for (const [date, data] of map) {
+      grouped.push({ date, dayTotal: data.reduce((s, e) => s + e.amount_base, 0), data });
+    }
+    setSections(grouped);
+    setBootstrapped(true);
+  }, []);
+
+  useFocusEffect(useCallback(() => { load(); }, [load]));
+
+  const confirmDelete = useCallback((item: ExpenseRow) => {
+    Alert.alert(
+      'Delete expense?',
+      `${fmtAmt(item.amount)} ${item.currency} · ${item.category_name}`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            await deleteExpense(item.id);
+            load();
+          },
+        },
+      ],
+    );
+  }, [load]);
+
+  if (!bootstrapped) {
+    return (
+      <SafeAreaView style={styles.root} edges={['top']}>
+        <View style={styles.center}>
+          <Text style={styles.muted}>Loading…</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>History</Text>
-      <Text style={styles.sub}>Phase 1 — coming next</Text>
-    </View>
+    <SafeAreaView style={styles.root} edges={['top']}>
+      <SectionList
+        sections={sections}
+        keyExtractor={item => String(item.id)}
+        stickySectionHeadersEnabled={false}
+        contentContainerStyle={sections.length === 0 ? styles.emptyContainer : styles.listContent}
+        ListHeaderComponent={
+          <View style={styles.mtdCard}>
+            <Text style={styles.mtdLabel}>THIS MONTH</Text>
+            <Text style={styles.mtdAmount}>{fmtAmt(mtdTotal)} TND</Text>
+          </View>
+        }
+        renderSectionHeader={({ section }) => (
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionDate}>{formatDate(section.date)}</Text>
+            <Text style={styles.sectionTotal}>{fmtAmt(section.dayTotal)} TND</Text>
+          </View>
+        )}
+        renderItem={({ item, index, section }) => {
+          const isFirst = index === 0;
+          const isLast  = index === section.data.length - 1;
+          return (
+            <Pressable
+              onPress={() => router.push(`/expense/${item.id}`)}
+              onLongPress={() => confirmDelete(item)}
+              delayLongPress={400}
+              style={({ pressed }) => [
+                styles.row,
+                isFirst && styles.rowFirst,
+                isLast  && styles.rowLast,
+                pressed && styles.rowPressed,
+              ]}
+            >
+              <View style={[styles.dot, { backgroundColor: item.category_color }]} />
+              <View style={styles.rowBody}>
+                <Text style={styles.rowCat} numberOfLines={1}>
+                  {item.category_icon ? `${item.category_icon} ` : ''}{item.category_name}
+                </Text>
+                {item.note ? (
+                  <Text style={styles.rowNote} numberOfLines={1}>{item.note}</Text>
+                ) : null}
+              </View>
+              <Text style={styles.rowAmt}>{fmtAmt(item.amount)} {item.currency}</Text>
+            </Pressable>
+          );
+        }}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ListEmptyComponent={
+          <View style={styles.center}>
+            <Text style={styles.muted}>No expenses this month</Text>
+          </View>
+        }
+      />
+    </SafeAreaView>
   );
 }
 
+// ── Styles ────────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title:     { fontSize: 24, fontWeight: '600' },
-  sub:       { marginTop: 8, color: '#888' },
+  root:           { flex: 1, backgroundColor: '#f2f2f7' },
+  listContent:    { paddingBottom: 32 },
+  emptyContainer: { flex: 1 },
+
+  // MTD card
+  mtdCard: {
+    backgroundColor: '#fff',
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 8,
+    borderRadius: 16,
+    paddingVertical: 20,
+    alignItems: 'center',
+  },
+  mtdLabel:  { fontSize: 11, fontWeight: '600', color: '#8e8e93', letterSpacing: 0.6 },
+  mtdAmount: { fontSize: 38, fontWeight: '300', color: '#1c1c1e', letterSpacing: -1, marginTop: 4 },
+
+  // Section header
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 6,
+  },
+  sectionDate:  { fontSize: 12, fontWeight: '700', color: '#8e8e93', textTransform: 'uppercase', letterSpacing: 0.5 },
+  sectionTotal: { fontSize: 12, fontWeight: '500', color: '#8e8e93' },
+
+  // Expense rows — grouped card effect
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 13,
+    marginHorizontal: 16,
+  },
+  rowFirst:   { borderTopLeftRadius: 12, borderTopRightRadius: 12 },
+  rowLast:    { borderBottomLeftRadius: 12, borderBottomRightRadius: 12 },
+  rowPressed: { backgroundColor: '#f2f2f7' },
+
+  dot:     { width: 10, height: 10, borderRadius: 5, marginRight: 12 },
+  rowBody: { flex: 1, marginRight: 10 },
+  rowCat:  { fontSize: 15, fontWeight: '500', color: '#1c1c1e' },
+  rowNote: { fontSize: 12, color: '#8e8e93', marginTop: 2 },
+  rowAmt:  { fontSize: 15, fontWeight: '600', color: '#1c1c1e' },
+
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#e5e5ea',
+    marginLeft: 38,
+    marginHorizontal: 16,
+  },
+
+  // Empty / loading
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  muted:  { fontSize: 15, color: '#8e8e93' },
 });
