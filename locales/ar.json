@@ -1,0 +1,12 @@
+{
+  "settings": {
+    "manage": "إدارة",
+    "categories_budgets": "الفئات والميزانيات",
+    "preferences": "التفضيلات",
+    "eur_tnd_rate": "سعر اليورو بالدينار",
+    "month_start_day": "يوم بداية الشهر",
+    "data": "البيانات",
+    "export_csv": "تصدير CSV",
+    "coming_soon": "قريباً"
+  }
+}

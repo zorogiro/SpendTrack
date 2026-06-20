@@ -1,38 +1,41 @@
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 export default function SettingsScreen() {
+  const { t } = useTranslation();
+
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scroll}>
 
         <View style={styles.group}>
-          <Text style={styles.groupLabel}>MANAGE</Text>
+          <Text style={styles.groupLabel}>{t('settings.manage')}</Text>
           <TouchableOpacity style={[styles.row, styles.rowOnly]} onPress={() => router.push('/categories')}>
-            <Text style={styles.rowLabel}>Categories &amp; Budgets</Text>
+            <Text style={styles.rowLabel}>{t('settings.categories_budgets')}</Text>
             <Text style={styles.chevron}>›</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.group}>
-          <Text style={styles.groupLabel}>PREFERENCES</Text>
+          <Text style={styles.groupLabel}>{t('settings.preferences')}</Text>
           <View style={[styles.row, styles.rowFirst]}>
-            <Text style={styles.rowLabel}>EUR → TND Rate</Text>
-            <Text style={styles.soon}>Coming soon</Text>
+            <Text style={styles.rowLabel}>{t('settings.eur_tnd_rate')}</Text>
+            <Text style={styles.soon}>{t('settings.coming_soon')}</Text>
           </View>
           <View style={styles.divider} />
           <View style={[styles.row, styles.rowLast]}>
-            <Text style={styles.rowLabel}>Month Start Day</Text>
-            <Text style={styles.soon}>Coming soon</Text>
+            <Text style={styles.rowLabel}>{t('settings.month_start_day')}</Text>
+            <Text style={styles.soon}>{t('settings.coming_soon')}</Text>
           </View>
         </View>
 
         <View style={styles.group}>
-          <Text style={styles.groupLabel}>DATA</Text>
+          <Text style={styles.groupLabel}>{t('settings.data')}</Text>
           <View style={[styles.row, styles.rowOnly]}>
-            <Text style={styles.rowLabel}>Export CSV</Text>
-            <Text style={styles.soon}>Coming soon</Text>
+            <Text style={styles.rowLabel}>{t('settings.export_csv')}</Text>
+            <Text style={styles.soon}>{t('settings.coming_soon')}</Text>
           </View>
         </View>
 

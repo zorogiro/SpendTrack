@@ -45,6 +45,7 @@ export interface Settings {
   base_currency: Currency;
   eur_to_tnd_rate: number;
   month_start_day: number;
+  language: string | null; // NULL = follow device locale; 'en'|'fr'|'ar' = user override
 }
 
 export interface ExpenseRow extends Expense {

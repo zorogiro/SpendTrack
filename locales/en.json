@@ -1,0 +1,12 @@
+{
+  "settings": {
+    "manage": "MANAGE",
+    "categories_budgets": "Categories & Budgets",
+    "preferences": "PREFERENCES",
+    "eur_tnd_rate": "EUR → TND Rate",
+    "month_start_day": "Month Start Day",
+    "data": "DATA",
+    "export_csv": "Export CSV",
+    "coming_soon": "Coming soon"
+  }
+}
